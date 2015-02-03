@@ -14,6 +14,7 @@
 #include "Commands/Subsystem.h"
 #include "WPILib.h"
 #include "../IMU/IMU.h"
+#include "../CrabSpeed.h"
 
 /**
  *
@@ -150,10 +151,12 @@ public:
 	void SetFRTurns(int val);
 	void SetRLTurns(int val);
 	void SetRRTurns(int val);
-	PIDController* DriveControlTwist;
+	CrabSpeed *CrabSpeedTwist;
+	PIDController *DriveControlTwist;
 	IMU *imu;
 	SerialPort *serialport;
 	I2C *UltrasonicFrontLeft;
+	I2C *UltrasonicFrontLeftRead;
 	I2C *UltrasonicFrontRight;
 	uint8_t USAdress;
 

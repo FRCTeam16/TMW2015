@@ -60,7 +60,15 @@ DriveBase::DriveBase() : Subsystem("DriveBase") {
     uint8_t update_rate_hz = 50;
     imu = new IMU(serialport,update_rate_hz);
     UltrasonicFrontLeft=new I2C(I2C::kMXP, 2);
-    UltrasonicFrontRight=new I2C(I2C::kMXP, 3);
+    UltrasonicFrontLeftRead=new I2C(I2C::kMXP, 3);
+    UltrasonicFrontRight=new I2C(I2C::kMXP, 4);
+
+	CrabSpeedTwist = new CrabSpeed();
+    DriveControlTwist = new PIDController(.035, 0, .1, imu, CrabSpeedTwist, 0.02);
+	DriveControlTwist->SetContinuous(true);
+	DriveControlTwist->SetInputRange(-360.0,360.0);
+	DriveControlTwist->SetAbsoluteTolerance(2.0);
+
 
 }
     

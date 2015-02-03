@@ -57,17 +57,19 @@ void Robot::RobotInit() {
 	pressed7 = false;
 	liftUsingJoystick = false;
 
-	dartPos1 = 400;
-	dartPos2 = 700;
+	dartPos1 = 460;
+	dartPos2 = 333;
 	dartClosedLoop = true;
-	homeLift = new HomeLiftTask();
+//	homeLift = new HomeLiftTask();
 	stackerControl = new StackerControlTask();
 	stackerControl->Start();
 
 	prefs->GetInstance();
 //	prefs->PutDouble("LiftSpeed", .6);
 
-
+	autoChooser = new SendableChooser();
+	autoChooser->AddDefault("01. 3TotePickup", (void*)ThreeTotePickup);
+	SmartDashboard::PutData("Autonomous Chooser", autoChooser);
   }
 
 void Robot::DisabledInit(){
@@ -76,20 +78,29 @@ void Robot::DisabledInit(){
 
 void Robot::DisabledPeriodic() {
 	Scheduler::GetInstance()->Run();
-	uint8_t USDistanceUpper = 0;
-	uint8_t USDistanceLower = 0;
-	uint8_t USRegister = 0x51;
+	unsigned char USDistance[2];
+//	uint8_t USDistanceLower = 0;
+	unsigned char USRegister = 0x51;
 	SmartDashboard::PutBoolean("USWriteSucess",driveBase->UltrasonicFrontLeft->Write(USRegister, 1));
 	Wait(.100);
-	SmartDashboard::PutBoolean("USUpperReadSucces", driveBase->UltrasonicFrontRight->ReadOnly(1, (uint8_t *)&USDistanceUpper));
-	SmartDashboard::PutBoolean("USLowerReadSucces", driveBase->UltrasonicFrontRight->ReadOnly(1, (uint8_t *)&USDistanceLower));
-	SmartDashboard::PutNumber("UltrasonicDistanceUpper", USDistanceUpper);
-	SmartDashboard::PutNumber("UltrasonicDistanceLower", USDistanceLower);
+	SmartDashboard::PutBoolean("USUpperReadSucces",driveBase->UltrasonicFrontLeftRead->ReadOnly( 2, USDistance));
+//	SmartDashboard::PutBoolean("USLowerReadSucces", driveBase->UltrasonicFrontRight->ReadOnly(1, (uint8_t *)&USDistanceLower));
+	SmartDashboard::PutNumber("UltrasonicDistanceUpper", USDistance[0]);
+	SmartDashboard::PutNumber("UltrasonicDistanceLower", USDistance[1]);
 	SmartDashboard::PutNumber("ScaledJoystick",-oi->getGamePad()->GetRawAxis(1));
-	cout << -oi->getScaledJoystick(oi->getGamePad()->GetRawAxis(1), 3) << endl;
 }
 
 void Robot::AutonomousInit() {
+    autoProgram = static_cast<AutoProgram>((int)(autoChooser->GetSelected()));
+	genericAutoProgram.clear();
+	switch(autoProgram) {
+
+	case ThreeTotePickup:
+		genericAutoProgram.push_back(IndexUp);
+		genericAutoProgram.push_back(Diveforward);
+		genericAutoProgram.push_back(End);
+	}
+	autoStep = genericAutoProgram[autoStepIncrementer];
 }
 
 void Robot::AutonomousPeriodic() {
@@ -181,8 +192,8 @@ void Robot::TeleopPeriodic() {
 	else
 		pressed7 = false;
 
-	if (oi->getDriverLeft()->GetRawButton(11))
-		homeLift->Start();
+	if (oi->getGamePad()->GetPOV(0) == 180)
+		stackerControl->Home();
 
 	if (fabs(oi->getGamePad()->GetRawAxis(1)) > .1) {
 		stackerControl->LiftOpenLoop(-oi->getScaledJoystick(oi->getGamePad()->GetRawAxis(1),3));

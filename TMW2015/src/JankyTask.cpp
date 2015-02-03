@@ -3,13 +3,24 @@
 #include <string>
 
 JankyTask::JankyTask(const char* taskName, uint32_t priority) {
+	  //cout << "JankyTask Constructor Start" << endl;
+ /* std::string name = taskName;
+  char tmp[30];
 
+  if (!taskName)
+  {
+    sprintf(tmp, "%d", GetFPGATime());
+    name = "jankyTask-";
+    name += tmp;
+  }
+*/
   enabled_ = false;
   running_ = true;
   isDead_ = false;
 
   task_ = new Task("JankyTask", (FUNCPTR)JankyTask::JankyPrivateStarterTask, priority);
   task_->Start((uint32_t)this);
+  //cout << "JankyTask Constructor Complete" << endl;
 }
 
 JankyTask::~JankyTask(){
