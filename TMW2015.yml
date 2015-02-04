@@ -398,16 +398,6 @@ Children:
       Name: Dart
     - Children: []
       Properties:
-        CAN ID: !!robotbuilder.data.properties.ChoicesProperty
-          choices: *id001
-          default: '2'
-          name: CAN ID
-          validators: *id002
-          value: '15'
-      Base: CAN Jaguar
-      Name: Squeeze
-    - Children: []
-      Properties:
         Input Channel (Digital): !!robotbuilder.data.properties.ChoicesProperty
           choices: *id010
           default: '0'
@@ -416,12 +406,6 @@ Children:
           value: '0'
       Base: Digital Input
       Name: Home
-    Properties:
-      Default Command: !!robotbuilder.data.properties.TypeSelectionProperty {default: None,
-        name: Default Command, type: Command, validators: null, value: None}
-    Base: Subsystem
-    Name: Stacker
-  - Children:
     - Children: []
       Properties:
         Type: !!robotbuilder.data.properties.ChoicesProperty
@@ -435,8 +419,24 @@ Children:
           default: '0'
           name: Output Channel (PWM)
           validators: *id009
-          value: '5'
+          value: '4'
       Base: Speed Controller
+      Name: Squeeze
+    Properties:
+      Default Command: !!robotbuilder.data.properties.TypeSelectionProperty {default: None,
+        name: Default Command, type: Command, validators: null, value: None}
+    Base: Subsystem
+    Name: Stacker
+  - Children:
+    - Children: []
+      Properties:
+        CAN ID: !!robotbuilder.data.properties.ChoicesProperty
+          choices: *id001
+          default: '2'
+          name: CAN ID
+          validators: *id002
+          value: '16'
+      Base: CAN Jaguar
       Name: Extension
     Properties:
       Default Command: !!robotbuilder.data.properties.TypeSelectionProperty {default: None,

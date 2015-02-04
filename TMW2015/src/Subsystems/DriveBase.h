@@ -156,7 +156,6 @@ public:
 	IMU *imu;
 	SerialPort *serialport;
 	I2C *UltrasonicFrontLeft;
-	I2C *UltrasonicFrontLeftRead;
 	I2C *UltrasonicFrontRight;
 	uint8_t USAdress;
 
