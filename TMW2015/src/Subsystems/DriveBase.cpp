@@ -60,16 +60,17 @@ DriveBase::DriveBase() : Subsystem("DriveBase") {
 	serialport = new SerialPort(57600,SerialPort::kMXP);
     uint8_t update_rate_hz = 50;
     imu = new IMU(serialport,update_rate_hz);
-//    UltrasonicFrontLeft=new I2C(I2C::kOnboard,1);
- //   UltrasonicFrontRight=new I2C(I2C::kOnboard, 2);
 
-    leftUS = new MaxBoticsI2CXL(I2C::kOnboard, 1, .100);
-    rightUS = new MaxBoticsI2CXL(I2C::kOnboard, 2, .100);
+    rightUS = new DualMaxBoticsI2CXL(I2C::kOnboard, 1, 2, .025);
+ //   frontUS = new MaxBoticsI2CXL(I2C::kOnboard, 2, .050);
 
 	CrabSpeedTwist = new CrabSpeed();
     DriveControlTwist = new PIDController(.035, 0, .1, imu, CrabSpeedTwist, 0.02);
 	DriveControlTwist->SetContinuous(false);
 	DriveControlTwist->SetAbsoluteTolerance(2.0);
+	DriveControlTwist->Enable();
+	DriveControlTwist->SetPID(.030, 0, .25);
+	DriveControlTwist->SetOutputRange(-.2, .2);
 
 
 }
@@ -463,21 +464,4 @@ bool DriveBase::ZeroGyro(float InitTime)  //performs gyro calibration
 	}
 
 	return GetClock() > GyroZeroTime + InitTime + 6;
-}
-
-void DriveBase::SMDB() {
-	SmartDashboard::PutNumber("IMUYaw",imu->GetYaw());
-	SmartDashboard::PutNumber("IMUPitch",imu->GetPitch());
-	SmartDashboard::PutNumber("IMURoll",imu->GetRoll());
-	SmartDashboard::PutNumber("FrontLeftSteerCurrent",frontRightSteer->GetOutputCurrent());
-	SmartDashboard::PutNumber("frontleftvolt",frontLeftPos->GetAverageVoltage());
-	SmartDashboard::PutNumber("rearleftvolt",rearLeftPos->GetAverageVoltage());
-	SmartDashboard::PutNumber("frontrightvolt",frontRightPos->GetAverageVoltage());
-	SmartDashboard::PutBoolean("ToteWideLeftB", toteWideLeft->Get());
-	SmartDashboard::PutBoolean("ToteNarrowLeftB", toteNarrowLeft->Get());
-	SmartDashboard::PutBoolean("ToteCenterB", toteCenter->Get());
-	SmartDashboard::PutBoolean("ToteNarrowRightB", toteNarrowRight->Get());
-	SmartDashboard::PutBoolean("ToteWideRightB", toteWideRight->Get());
-	SmartDashboard::PutNumber("UltrasonicDistanceLeft", leftUS->GetDistance());
-	SmartDashboard::PutNumber("UltrasonicDistanceRight", rightUS->GetDistance());
 }

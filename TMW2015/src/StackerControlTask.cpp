@@ -14,12 +14,9 @@ StackerControlTask::StackerControlTask() {
 	liftClosedLoop = false;
 	controlRange = 2000;
 	homing = false;
-	squeezed = false;
-	extended = false;
 	homed = false;
 	prevCycleTime = GetClock();
 	homeStartTime = GetClock();
-	squeezeStartTime = GetClock();
 }
 
 StackerControlTask::~StackerControlTask() {
@@ -34,24 +31,16 @@ void StackerControlTask::Run() {
 	if(homing) {
 		if(Robot::stacker->home->Get() && !homed)
 			if (Robot::stacker->liftFrontRight->GetPosition() > 20000)
-				Robot::stacker->liftFrontRight->Set(-.6);
+				SetOutput(-.6);
 			else
-				Robot::stacker->liftFrontRight->Set(-.3);
+				SetOutput(-.4);
 		else {
 			Robot::stacker->liftFrontRight->SetPosition(0);
 			homed = true;
-			Robot::stacker->liftFrontRight->Set(0);
+			SetOutput(0);
 		}
 
-		if (/*ADD POSTION IN HERE*/(Robot::pdp->GetCurrent(9) < 10 && !squeezed) || GetClock() - homeStartTime < 1.5)
-			Robot::stacker->squeeze->Set(.5);
-		else {
-			Robot::stacker->squeeze->Set(0);
-			squeezed = true;
-		}
-
-
-		if (homed && squeezed && Robot::stacker->dart->GetPosition() < 70) {
+		if (homed && Robot::squeezeControl->GetOpened() && (Robot::stacker->dart->GetPosition() < 100 || !Robot::stacker->dart->GetReverseLimitOK())) {
 			homing = false;
 			i = 0;
 		}
@@ -60,27 +49,18 @@ void StackerControlTask::Run() {
 		if(liftClosedLoop) {
 			int error = GetError();
 			if (error > controlRange)
-				Robot::stacker->liftFrontRight->Set(liftPositionSpeeds[i]);
+				SetOutput(liftPositionSpeeds[i]);
 			else if (error > 0)
-				Robot::stacker->liftFrontRight->Set(liftPositionSpeeds[i]*error/controlRange);
+				SetOutput(liftPositionSpeeds[i]*error/controlRange);
 			else if (error > -controlRange)
-				Robot::stacker->liftFrontRight->Set(.2*error/controlRange);
+				SetOutput(.2*error/controlRange);
 			else if (error < -controlRange)
-				Robot::stacker->liftFrontRight->Set(-.2);
+				SetOutput(-.2);
 			else
-				Robot::stacker->liftFrontRight->Set(0);
+				SetOutput(0);
 		}
 		else {
-			Robot::stacker->liftFrontRight->Set(openLoopSpeed);
-		}
-	}
-
-	if (i == 1 && fabs(GetError()) < 1000) {
-		if ((Robot::pdp->GetCurrent(9) < 10 && !squeezed) || GetClock() - squeezeStartTime < 1.5)
-			Robot::stacker->squeeze->Set(-0.5);
-		else {
-			Robot::stacker->squeeze->Set(0);
-			squeezed = true;
+			SetOutput(openLoopSpeed);
 		}
 	}
 
@@ -96,8 +76,7 @@ void StackerControlTask::IncLiftPosition() {
 	SetLiftPosition(i);
 
 	if (i == 1) {
-		squeezed = false;
-		squeezeStartTime = GetClock();
+		Robot::squeezeControl->Close(true);
 	}
 }
 
@@ -127,9 +106,9 @@ bool StackerControlTask::GetLiftClosedLoop() {
 
 void StackerControlTask::Home() {
 	homing = true;
-	squeezed = false;
 	homed = false;
 	homeStartTime = GetClock();
+	Robot::squeezeControl->Open();
 }
 
 int StackerControlTask::GetError() {
@@ -142,4 +121,8 @@ bool StackerControlTask::GetHoming() {
 
 int StackerControlTask::Geti() {
 	return i;
+}
+
+void StackerControlTask::SetOutput(float output) {
+	Robot::stacker->liftFrontRight->Set(12.5/Robot::stacker->liftFrontRight->GetBusVoltage()*output);
 }

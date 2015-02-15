@@ -29,19 +29,17 @@ public:
 
 private:
 	//int liftPositions[7] = {0, 21625, 42362, 63000, 83625, 104775, 112125};
-	int liftPositions[7] = {0, 20858, 41200, 62310, 83123, 103797, 112125};
-	float liftPositionSpeeds[7] = {.1, .4, .5, .5, .6, .7, .7};
+	int liftPositions[7] = {0, 20858, 41600, 62810, 83123, 103797, 112125};
+	float liftPositionSpeeds[7] = {.1, .4, .5, .6, .7, .8, .8};
 	int i;
 	bool liftClosedLoop;
 	float openLoopSpeed;
 	int controlRange;
 	bool homing;
-	bool squeezed;
 	bool homed;
-	bool extended;
 	float prevCycleTime;
 	float homeStartTime;
-	float squeezeStartTime;
+	void SetOutput(float output);
 };
 
 #endif /* SRC_StackerControlTask_H_ */

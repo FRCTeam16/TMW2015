@@ -28,15 +28,3 @@ Stacker::Stacker() : Subsystem("Stacker") {
     
 void Stacker::InitDefaultCommand() {
 }
-
-void Stacker::SMDB() {
-	SmartDashboard::PutNumber("DartPosition",dart->GetAnalogIn());
-	SmartDashboard::PutNumber("DartForwardPosition", dart->GetForwardLimitOK());
-	SmartDashboard::PutNumber("DartReversePosition", dart->GetReverseLimitOK());
-	SmartDashboard::PutNumber("LitPosition",liftFrontLeft->GetEncPosition());
-	SmartDashboard::PutNumber("SqueezePosition", squeezePosition->GetDistance());
-	SmartDashboard::PutNumber("SqueezeRawPosition", squeezePosition->GetRaw());
-	SmartDashboard::PutBoolean("StackerHomeSwitch", home->Get());
-	SmartDashboard::PutNumber("SqueezeOutput", squeeze->Get());
-	SmartDashboard::PutNumber("LiftPosition", liftFrontRight->GetPosition());
-}

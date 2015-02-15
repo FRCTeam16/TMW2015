@@ -16,6 +16,7 @@
 #include "../IMU/IMU.h"
 #include "../CrabSpeed.h"
 #include "../MaxBoticsI2CXL.h"
+#include "../DualMaxBoticsI2CXL.h"
 
 /**
  *
@@ -153,16 +154,16 @@ public:
 	void SetFRTurns(int val);
 	void SetRLTurns(int val);
 	void SetRRTurns(int val);
-	void SMDB();
 	CrabSpeed *CrabSpeedTwist;
 	PIDController *DriveControlTwist;
 	IMU *imu;
 	SerialPort *serialport;
-	I2C *UltrasonicFrontLeft;
-	I2C *UltrasonicFrontRight;
 	uint8_t USAdress;
-	MaxBoticsI2CXL *leftUS;
-	MaxBoticsI2CXL *rightUS;
+	//MaxBoticsI2CXL *frontUS;
+	//MaxBoticsI2CXL *rightUS;
+
+	DualMaxBoticsI2CXL *rightUS;
+
 
 };
 
