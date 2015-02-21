@@ -25,7 +25,7 @@ void SqueezeControlTask::Run() {
 	switch (squeezerState) {
 
 	case Opening:
-		if (Robot::pdp->GetCurrent(9) > 4 && Robot::stacker->squeezePosition->GetRaw() > -15000)
+		if (Robot::stacker->squeeze->GetOutputCurrent() > 4 && Robot::stacker->squeezePosition->GetRaw() > -15000)
 			currentStop++;
 		else
 			currentStop = 0;
@@ -37,15 +37,15 @@ void SqueezeControlTask::Run() {
 			Robot::stacker->squeezePosition->Reset();
 		}
 		else if (Robot::stacker->squeezePosition->GetRaw() > -5000){ // check for slow down
-			Robot::stacker->squeeze->Set(.25);
+			Robot::stacker->squeeze->Set(-.50);
 		}
 		else { // just run
-			Robot::stacker->squeeze->Set(.75);
+			Robot::stacker->squeeze->Set(-.75);
 		}
 		break;
 
 	case Closing:
-		if (Robot::pdp->GetCurrent(9) < 10)
+		if (Robot::stacker->squeeze->GetOutputCurrent() < 10)
 			currentStop = 0;
 		else
 			currentStop++;
@@ -56,7 +56,7 @@ void SqueezeControlTask::Run() {
 			squeezerState = Hold;
 		}
 		else {
-			Robot::stacker->squeeze->Set(-0.75); // just run
+			Robot::stacker->squeeze->Set(0.75); // just run
 		}
 		break;
 

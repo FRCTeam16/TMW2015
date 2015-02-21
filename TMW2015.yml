@@ -418,19 +418,13 @@ Children:
       Name: Home
     - Children: []
       Properties:
-        Type: !!robotbuilder.data.properties.ChoicesProperty
-          choices: *id007
-          default: Talon
-          name: Type
-          validators: null
-          value: Talon
-        Output Channel (PWM): !!robotbuilder.data.properties.ChoicesProperty
-          choices: *id008
-          default: '0'
-          name: Output Channel (PWM)
-          validators: *id009
-          value: '4'
-      Base: Speed Controller
+        CAN ID: !!robotbuilder.data.properties.ChoicesProperty
+          choices: *id001
+          default: '2'
+          name: CAN ID
+          validators: *id002
+          value: '16'
+      Base: CAN Jaguar
       Name: Squeeze
     - Children: []
       Properties:
@@ -476,19 +470,103 @@ Children:
   - Children:
     - Children: []
       Properties:
-        CAN ID: !!robotbuilder.data.properties.ChoicesProperty
-          choices: *id001
-          default: '2'
-          name: CAN ID
-          validators: *id002
-          value: '16'
-      Base: CAN Jaguar
+        Type: !!robotbuilder.data.properties.ChoicesProperty
+          choices: *id007
+          default: Talon
+          name: Type
+          validators: null
+          value: Talon
+        Output Channel (PWM): !!robotbuilder.data.properties.ChoicesProperty
+          choices: *id008
+          default: '0'
+          name: Output Channel (PWM)
+          validators: *id009
+          value: '4'
+      Base: Speed Controller
       Name: Extension
     Properties:
       Default Command: !!robotbuilder.data.properties.TypeSelectionProperty {default: None,
         name: Default Command, type: Command, validators: null, value: None}
     Base: Subsystem
     Name: Grabber
+  - Children:
+    - Children: []
+      Properties:
+        Output Channel (Digital): !!robotbuilder.data.properties.ChoicesProperty
+          choices: &id012 ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10',
+            '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22',
+            '23', '24', '25']
+          default: '0'
+          name: Output Channel (Digital)
+          validators: &id013 [DigitalChannel]
+          value: '10'
+      Base: Digital Output
+      Name: SensorLeft
+    - Children: []
+      Properties:
+        Output Channel (Digital): !!robotbuilder.data.properties.ChoicesProperty
+          choices: *id012
+          default: '0'
+          name: Output Channel (Digital)
+          validators: *id013
+          value: '14'
+      Base: Digital Output
+      Name: SensorRight
+    - Children: []
+      Properties:
+        Output Channel (Digital): !!robotbuilder.data.properties.ChoicesProperty
+          choices: *id012
+          default: '0'
+          name: Output Channel (Digital)
+          validators: *id013
+          value: '15'
+      Base: Digital Output
+      Name: RobotState1
+    - Children: []
+      Properties:
+        Output Channel (Digital): !!robotbuilder.data.properties.ChoicesProperty
+          choices: *id012
+          default: '0'
+          name: Output Channel (Digital)
+          validators: *id013
+          value: '16'
+      Base: Digital Output
+      Name: RobotState2
+    - Children: []
+      Properties:
+        Output Channel (Digital): !!robotbuilder.data.properties.ChoicesProperty
+          choices: *id012
+          default: '0'
+          name: Output Channel (Digital)
+          validators: *id013
+          value: '11'
+      Base: Digital Output
+      Name: SensorMiddleLeft
+    - Children: []
+      Properties:
+        Output Channel (Digital): !!robotbuilder.data.properties.ChoicesProperty
+          choices: *id012
+          default: '0'
+          name: Output Channel (Digital)
+          validators: *id013
+          value: '12'
+      Base: Digital Output
+      Name: SensorMiddle
+    - Children: []
+      Properties:
+        Output Channel (Digital): !!robotbuilder.data.properties.ChoicesProperty
+          choices: *id012
+          default: '0'
+          name: Output Channel (Digital)
+          validators: *id013
+          value: '13'
+      Base: Digital Output
+      Name: SensorMiddleRight
+    Properties:
+      Default Command: !!robotbuilder.data.properties.TypeSelectionProperty {default: None,
+        name: Default Command, type: Command, validators: null, value: None}
+    Base: Subsystem
+    Name: Arduino
   Properties: {}
   Base: Subsystems
   Name: Subsystems
@@ -496,30 +574,30 @@ Children:
   - Children: []
     Properties:
       Number: !!robotbuilder.data.properties.ChoicesProperty
-        choices: &id012 ['0', '1', '2', '3', '4', '5']
+        choices: &id014 ['0', '1', '2', '3', '4', '5']
         default: 1
         name: Number
-        validators: &id013 [Joystick]
+        validators: &id015 [Joystick]
         value: '1'
     Base: Joystick
     Name: DriverLeft
   - Children: []
     Properties:
       Number: !!robotbuilder.data.properties.ChoicesProperty
-        choices: *id012
+        choices: *id014
         default: 1
         name: Number
-        validators: *id013
+        validators: *id015
         value: '0'
     Base: Joystick
     Name: DriverRight
   - Children: []
     Properties:
       Number: !!robotbuilder.data.properties.ChoicesProperty
-        choices: *id012
+        choices: *id014
         default: 1
         name: Number
-        validators: *id013
+        validators: *id015
         value: '2'
     Base: Joystick
     Name: GamePad

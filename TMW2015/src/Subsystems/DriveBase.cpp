@@ -427,16 +427,16 @@ void DriveBase::SetRRTurns(int val) {
 void DriveBase::SetDriveSpeed(float FLSpeed, float FRSpeed, float RLSpeed, float RRSpeed) {
 //applies inversion variables defined in SetSteerSetPoint function
 	if(driveFront) {
-		frontLeftDrive->Set(FLSpeed*FLInv);
-		frontRightDrive->Set(FRSpeed*FRInv);
-		rearLeftDrive->Set(RLSpeed*RLInv);
-		rearRightDrive->Set(RRSpeed*RRInv);
+		frontLeftDrive->Set(-FLSpeed*FLInv);
+		frontRightDrive->Set(-FRSpeed*FRInv);
+		rearLeftDrive->Set(-RLSpeed*RLInv);
+		rearRightDrive->Set(-RRSpeed*RRInv);
 	}
 	else {
-		frontLeftDrive->Set(RRSpeed*FLInv);
-		frontRightDrive->Set(RLSpeed*FRInv);
-		rearLeftDrive->Set(FRSpeed*RLInv);
-		rearRightDrive->Set(FLSpeed*RRInv);
+		frontLeftDrive->Set(-RRSpeed*FLInv);
+		frontRightDrive->Set(-RLSpeed*FRInv);
+		rearLeftDrive->Set(-FRSpeed*RLInv);
+		rearRightDrive->Set(-FLSpeed*RRInv);
 	}
 }
 void DriveBase::Lock() //locks wheels to prevent robot movement
