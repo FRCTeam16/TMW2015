@@ -30,12 +30,16 @@ public:
 	bool GetSmoked();
 	void SetDartClosedLoop(bool ClosedLoop);
 	bool GetDartClosedLoop();
+	void SetAutoSpeed(bool AutoSpeed);
+	void LiftContainer();
 
 private:
-	//int liftPositions[7] = {0, 21625, 42362, 63000, 83625, 104775, 112125};
-	int liftPositions[8] = {0, 20000, 20858, 41600, 62000, 83123, 103797, 112125};
-	float liftPositionSpeeds[8] = {.1, .4, .4, .5, .6, .7, .75, .75};
-	typedef enum {Homing, ClosedLoop, OpenLoop, Releasing} LiftState;
+//	int liftPositions[8] = {0, 20000, 20858, 41600, 62000, 83123, 103797, 112125};  //Competition
+	int liftPositions[10] = {0, 20000, 20858, 42053, 62800, 83944, 104706, 112125, 69000, 116806};  //Practice
+	float liftPositionSpeeds[10] = {.1, .4, .4, .5, .6, .7, .75, .75, .7, .75};
+	float autoLiftPositionSpeeds[10] = {.1, .4, .4, .6, .6, .7, .75, .75, .7, .75};
+	bool autoSpeed;
+	typedef enum {Homing, ClosedLoop, OpenLoop, Releasing, ContainerUp} LiftState;
 	LiftState liftState;
 	typedef enum {Down, Back, ReleaseContainer, Up} ReleaseState;
 	ReleaseState releaseState;
@@ -46,9 +50,10 @@ private:
 	int releaseDartStartPosition;
 	int releaseLiftStartPosition;
 	bool homed;
-	float prevCycleTime;
-	float homeStartTime;
-	float smokeStartTime;
+	double prevCycleTime;
+	double homeStartTime;
+	double smokeStartTime;
+	double incStartTime;
 	bool liftSmoked;
 	void SetOutput(float output);
 };

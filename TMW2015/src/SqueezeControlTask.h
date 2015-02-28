@@ -4,14 +4,14 @@
  *  Created on: Jan 28, 2015
  *      Author: Programmer
  */
-#include "jankyTask.h"
+#include "JankySlowTask.h"
 #include "WPILib.h"
 #include "Robot.h"
 
 #ifndef SRC_SqueezeControlTask_H_
 #define SRC_SqueezeControlTask_H_
 
-class SqueezeControlTask: public JankyTask
+class SqueezeControlTask: public JankySlowTask
 {
 public:
 	SqueezeControlTask();

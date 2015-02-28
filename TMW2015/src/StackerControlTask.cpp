@@ -11,7 +11,7 @@ using namespace std;
 StackerControlTask::StackerControlTask() {
 	i = 0;
 	openLoopSpeed = 0;
-	controlRange = 1100;
+	controlRange = 2000;
 	homed = false;
 	liftSmoked = false;
 	prevCycleTime = GetClock();
@@ -22,6 +22,8 @@ StackerControlTask::StackerControlTask() {
 	liftState = OpenLoop;
 	releaseState = Down;
 	dartClosedLoop = true;
+	incStartTime = GetClock();
+	autoSpeed = false;
 }
 
 StackerControlTask::~StackerControlTask() {
@@ -31,13 +33,16 @@ StackerControlTask::~StackerControlTask() {
 void StackerControlTask::Run() {
 
 	int error = GetError();
+	float speed = 0;
+
+	float ramp = 0;
 
 	switch(liftState) {
 
 	case Homing:
 		if(Robot::stacker->home->Get() && !homed)
 			if (Robot::stacker->liftFrontRight->GetPosition() > 20000)
-				SetOutput(-.6);
+				SetOutput(-.3);
 			else
 				SetOutput(-.4);
 		else {
@@ -48,17 +53,30 @@ void StackerControlTask::Run() {
 
 		if (homed && Robot::squeezeControl->GetOpened() && (Robot::stacker->dart->GetPosition() < 100 || !Robot::stacker->dart->GetReverseLimitOK())) {
 			liftState = ClosedLoop;
-			i = 0;
 		}
 		break;
 
 	case ClosedLoop:
+		if(autoSpeed) {
+			speed = autoLiftPositionSpeeds[i];
+			ramp = (GetClock() - incStartTime)*.5;
+			if(ramp > 1)
+				ramp = 1;
+		}
+		else {
+			speed = liftPositionSpeeds[i];
+			ramp = (GetClock() - incStartTime)*2;
+			if(ramp > 1)
+				ramp = 1;
+
+		}
+
 		if (error > controlRange)
-			SetOutput(liftPositionSpeeds[i]);
-		else if (error > controlRange/2)
-			SetOutput(liftPositionSpeeds[i]*error/controlRange);
-		else if (error > -controlRange/2)
-			SetOutput(0);
+			SetOutput(speed*ramp);
+		else if (error > 0)
+			SetOutput(speed*error/controlRange);
+//		else if (error > -controlRange/2)
+//			SetOutput(0);
 		else if (error > -controlRange)
 			SetOutput(.3*error/controlRange);
 		else if (error < -controlRange)
@@ -110,6 +128,26 @@ void StackerControlTask::Run() {
 		}
 
 		break;
+
+	case ContainerUp:
+		if(GetClock() - incStartTime < 3) {
+			error = 116806 - Robot::stacker->liftFrontRight->GetPosition();
+			speed = .75;
+		}
+		else
+//			error = top - - Robot::stacker->liftFrontRight->GetPosition();
+
+		if (error > controlRange)
+			SetOutput(speed);
+		else if (error > 0)
+			SetOutput(speed*error/controlRange);
+		else if (error > -controlRange)
+			SetOutput(.3*error/controlRange);
+		else if (error < -controlRange)
+			SetOutput(-.3);
+		else
+			SetOutput(0);
+		break;
 	}
 }
 
@@ -119,6 +157,7 @@ void StackerControlTask::IncLiftPosition() {
 
 	if(i < 7)
 		i++;
+	incStartTime = GetClock();
 
 	if (i == 1) {
 		Robot::squeezeControl->Close(true);
@@ -153,6 +192,7 @@ void StackerControlTask::Home() {
 	homeStartTime = GetClock();
 	Robot::squeezeControl->Open();
 	homed = false;
+	i = 0;
 }
 
 void StackerControlTask::Release() {
@@ -163,7 +203,8 @@ void StackerControlTask::Release() {
 }
 
 int StackerControlTask::GetError() {
-	return liftPositions[i] - Robot::stacker->liftFrontRight->GetPosition();
+	return liftPositions[i] + 1000 - Robot::stacker->liftFrontRight->GetPosition();
+	//added 1000 to positions for practice bot
 }
 
 bool StackerControlTask::GetHoming() {
@@ -179,11 +220,11 @@ bool StackerControlTask::GetSmoked() {
 }
 
 void StackerControlTask::SetOutput(float output) {
-	if(Robot::stacker->liftFrontRight->GetOutputCurrent() < 40 || Robot::stacker->liftFrontLeft->GetOutputCurrent() < 40 )
+	if(Robot::stacker->liftFrontRight->GetOutputCurrent() < 40 && Robot::stacker->liftFrontLeft->GetOutputCurrent() < 40 )
 		smokeStartTime = GetClock();
 
-	if (smokeStartTime - GetClock() > 2)
-		liftSmoked = true;
+//	if (GetClock() - smokeStartTime > 2)
+//		liftSmoked = true;
 
 	if(!liftSmoked)
 		Robot::stacker->liftFrontRight->Set(12.5/Robot::stacker->liftFrontRight->GetBusVoltage()*output);
@@ -197,4 +238,13 @@ void StackerControlTask::SetDartClosedLoop(bool ClosedLoop) {
 
 bool StackerControlTask::GetDartClosedLoop() {
 	return dartClosedLoop;
+}
+
+void StackerControlTask::SetAutoSpeed(bool AutoSpeed) {
+	autoSpeed = AutoSpeed;
+}
+
+void StackerControlTask::LiftContainer() {
+	incStartTime = GetClock();
+	liftState = ContainerUp;
 }

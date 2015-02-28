@@ -25,38 +25,38 @@ void SqueezeControlTask::Run() {
 	switch (squeezerState) {
 
 	case Opening:
-		if (Robot::stacker->squeeze->GetOutputCurrent() > 4 && Robot::stacker->squeezePosition->GetRaw() > -15000)
+		if (Robot::stacker->squeeze->GetOutputCurrent() > 10 && Robot::stacker->squeezePosition->GetRaw() > -15000)
 			currentStop++;
 		else
 			currentStop = 0;
 
-		if (currentStop > 50 || GetClock() - startTime > 3.0) { // check for stop
+		if (currentStop > 5 || GetClock() - startTime > 3.0) { // check for stop
 			Robot::stacker->squeeze->Set(0);
 			opened = true;
 			squeezerState = Hold;
 			Robot::stacker->squeezePosition->Reset();
 		}
 		else if (Robot::stacker->squeezePosition->GetRaw() > -5000){ // check for slow down
-			Robot::stacker->squeeze->Set(-.50);
+			Robot::stacker->squeeze->Set(-.5);
 		}
 		else { // just run
-			Robot::stacker->squeeze->Set(-.75);
+			Robot::stacker->squeeze->Set(-1.0);
 		}
 		break;
 
 	case Closing:
-		if (Robot::stacker->squeeze->GetOutputCurrent() < 10)
+		if (Robot::stacker->squeeze->GetOutputCurrent() < 20)
 			currentStop = 0;
 		else
 			currentStop++;
-
-		if (currentStop > 100 || GetClock() - startTime > 1.5 || (currentStop == 0 && Robot::stacker->squeezePosition->GetRaw() < -50000)) { // check for stop
+		cout << currentStop << endl;
+		if (currentStop > 10 || GetClock() - startTime > 1.5 || (currentStop == 0 && Robot::stacker->squeezePosition->GetRaw() < -50000)) { // check for stop
 			Robot::stacker->squeeze->Set(0);
 			squeezed = true;
 			squeezerState = Hold;
 		}
 		else {
-			Robot::stacker->squeeze->Set(0.75); // just run
+			Robot::stacker->squeeze->Set(1.0); // just run
 		}
 		break;
 

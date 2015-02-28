@@ -42,7 +42,6 @@ public:
 	static DigitalInput* driveBaseToteNarrowLeft;
 	static DigitalInput* driveBaseToteNarrowRight;
 	static DigitalInput* driveBaseToteWideRight;
-	static DigitalInput* driveBaseToteCenter;
 	static CANTalon* stackerLiftFrontRight;
 	static CANTalon* stackerLiftFrontLeft;
 	static CANTalon* stackerDart;
