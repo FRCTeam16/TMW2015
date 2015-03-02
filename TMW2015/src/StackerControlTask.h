@@ -35,13 +35,17 @@ public:
 
 private:
 //	int liftPositions[8] = {0, 20000, 20858, 41600, 62000, 83123, 103797, 112125};  //Competition
-	int liftPositions[10] = {0, 20000, 20858, 42053, 62800, 83944, 104706, 112125, 69000, 116806};  //Practice
-	float liftPositionSpeeds[10] = {.1, .4, .4, .5, .6, .7, .75, .75, .7, .75};
-	float autoLiftPositionSpeeds[10] = {.1, .4, .4, .6, .6, .7, .75, .75, .7, .75};
+	int liftPositions[10] = {0, 19500, 20858, 41750, 62800, 83944, 104706, 112125, 67400, 116806};  //Practice
+	//float liftPositionSpeeds[10] = {.1, .4, .4, .5, .6, .7, .75, .75, .7, .75}; Remmed on 2/28/07 after new lift
+	float liftPositionSpeeds[10] =     {.1, .5, .5, .6, .7, .8, .85, .85, .8, .85};
+	float autoLiftPositionSpeeds[10] = {.1, .4, .4, .5, .5, .7, .75, .75, .7, .75};
 	bool autoSpeed;
 	typedef enum {Homing, ClosedLoop, OpenLoop, Releasing, ContainerUp} LiftState;
 	LiftState liftState;
-	typedef enum {Down, Back, ReleaseContainer, Up} ReleaseState;
+	typedef enum {DartOut, Down, Vert, ReleaseContainer, Back, Up} ReleaseState;
+	int dartStartRelease = 400;
+	int dartVert = 500;
+	int dartEndRelease = 800;
 	ReleaseState releaseState;
 	int i;
 	float openLoopSpeed;

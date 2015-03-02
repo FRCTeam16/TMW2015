@@ -119,17 +119,24 @@ void Robot::AutonomousInit() {
 		genericAutoProgram.push_back(ForwardToTote);
 		genericAutoProgram.push_back(IndexUp);
 		genericAutoProgram.push_back(WaitForLiftCoast);
+//		genericAutoProgram.push_back(DrivePastContainer);
+//		genericAutoProgram.push_back(ForwardToThirdTote);
 		genericAutoProgram.push_back(DriveForward15);
 		genericAutoProgram.push_back(ForwardToTote);
 		genericAutoProgram.push_back(PickThirdTote);
-		genericAutoProgram.push_back(WaitForLiftCoast);
-		genericAutoProgram.push_back(DriveToAutoZone);
+		genericAutoProgram.push_back(WaitForLiftFinal);
+		genericAutoProgram.push_back(DriveToAutoZone1);
+		genericAutoProgram.push_back(DriveToAutoZone2);
 		genericAutoProgram.push_back(DropTotes);
-		genericAutoProgram.push_back(BackAwayFromTotes);
+		genericAutoProgram.push_back(WaitForDart);
+		genericAutoProgram.push_back(PickThirdTote);
+		genericAutoProgram.push_back(WaitForLiftFinal);
+		genericAutoProgram.push_back(DartBack);
 		genericAutoProgram.push_back(End);
 
 		stackerControl->SetLiftPosition(0);
 		stackerControl->SetAutoSpeed(true);
+		stacker->liftFrontRight->SetPosition(-428);
 		break;
 
 	case ContainerGrabber:
@@ -142,7 +149,8 @@ void Robot::AutonomousInit() {
 		break;
 
 	case DriveForward:
-		genericAutoProgram.push_back(DriveToAutoZone);
+		genericAutoProgram.push_back(DriveToAutoZone1);
+		genericAutoProgram.push_back(DriveToAutoZone2);
 		genericAutoProgram.push_back(End);
 		break;
 
@@ -151,7 +159,8 @@ void Robot::AutonomousInit() {
 		genericAutoProgram.push_back(IndexUp);
 		genericAutoProgram.push_back(IndexUp);
 		genericAutoProgram.push_back(WaitForLift);
-		genericAutoProgram.push_back(DriveToAutoZone);
+		genericAutoProgram.push_back(DriveToAutoZone1);
+		genericAutoProgram.push_back(DriveToAutoZone2);
 		genericAutoProgram.push_back(End);
 		break;
 
@@ -159,13 +168,16 @@ void Robot::AutonomousInit() {
 		genericAutoProgram.push_back(End);
 		break;
 	}
+	autoStart = GetClock();
 	autoStepi = 0;
 	autoStep = genericAutoProgram[autoStepi];
 	autoStepTime = GetClock();
 	onTargetCounter = 0;
 	robotAngle = 0;
 	driveBase->imu->ZeroYaw();
-}
+	stackerControl->SetDartClosedLoop(true);
+	stacker->dart->SetControlMode(CANSpeedController::kPosition);
+	stacker->dart->Set(stacker->dart->GetPosition());}
 
 void Robot::AutonomousPeriodic() {
 	SmartDashboard::PutBoolean("LiftSmokedB",!stackerControl->GetSmoked());
@@ -174,9 +186,6 @@ void Robot::AutonomousPeriodic() {
 	float x = 0;
 	float y = 0;
 	bool useDriveParams;
-
-	float turnError = 0;
-	float speed = 0;
 
 	switch(autoStep) {
 	case IndexUp:
@@ -202,14 +211,24 @@ void Robot::AutonomousPeriodic() {
 		x = 0;
 		y = 0;
 		useDriveParams = true;
-		if(stackerControl->GetError() < 100) {
+		if(stackerControl->GetError() < 15000) {
 			autoStepComplete = true;
 		}
 		break;
 
 	case WaitForLiftCoast:
 		SmartDashboard::PutString("AutoStep", "WaitForLiftCoast");
-		x = .15;
+		x = .2;
+		y = 0;
+		useDriveParams = true;
+		if(stackerControl->GetError() < 10000) {
+			autoStepComplete = true;
+		}
+		break;
+
+	case WaitForLiftFinal:
+		SmartDashboard::PutString("AutoStep", "WaitForLiftCoast");
+		x = 0;
 		y = 0;
 		useDriveParams = true;
 		if(stackerControl->GetError() < 100) {
@@ -220,27 +239,23 @@ void Robot::AutonomousPeriodic() {
 	case Turn90:
 		SmartDashboard::PutString("AutoStep", "Turn90");
 		useDriveParams = false;
-		turnError = 90 - driveBase->imu->GetYaw();
-		speed = -.05*turnError;
-		if(speed > .5)
-			speed = .5;
-		if(speed < -.5)
-			speed = -.5;
-		driveBase->Steer(2.75,speed,1.0);
-		if(fabs(turnError) < 2) {
+		driveBase->DriveControlTwist->SetSetpoint(90);
+		driveBase->DriveControlTwist->SetPID(.2, 0, 1.5);
+		driveBase->DriveControlTwist->SetOutputRange(-.4, .4);
+		driveBase->Steer(2.75,-driveBase->CrabSpeedTwist->Get(),1.1);
+		if(fabs(driveBase->DriveControlTwist->GetError()) < 2) {
 			onTargetCounter++;
 		}
 
-		if (onTargetCounter > 10) {
+		if (onTargetCounter > 2) {
 			autoStepComplete = true;
-			stackerControl->SetAutoSpeed(false);
 		}
 
 		break;
 
-	case CrabToWall:
-		SmartDashboard::PutString("AutoStep", "CrabToWall");
-		y = -.05*(autoleftUSDistanceToWall - driveBase->leftUS->GetDistance());
+	case CrabAwayFromWall:
+		SmartDashboard::PutString("AutoStep", "CrabAwayFromWall");
+		y = -.05*(autoFarUSDistanceToWall - driveBase->leftUS->GetDistance1());
 		if (y<-.4)
 			y=-.4;
 		if (y>.4)
@@ -250,7 +265,51 @@ void Robot::AutonomousPeriodic() {
 		driveBase->DriveControlTwist->SetPID(.01, 0, .15);
 		driveBase->DriveControlTwist->SetOutputRange(-.2, .2);
 		useDriveParams = true;
-		if(fabs(autoleftUSDistanceToWall - driveBase->leftUS->GetDistance()) < 2) {
+		if(fabs(autoFarUSDistanceToWall - driveBase->leftUS->GetDistance1()) < 2) {
+			onTargetCounter++;
+			if(onTargetCounter > 5) {
+				autoStepComplete = true;
+			}
+		}
+		break;
+
+	case DrivePastContainer:
+		SmartDashboard::PutString("AutoStep", "DrivePastContainer");
+		if(driveBase->leftUS->GetDistance2() > 65) {
+			y = -.05*(autoleftUSDistanceToWall - driveBase->leftUS->GetDistance2());
+			if (y<-.4)
+				y=-.4;
+			if (y>.4)
+				y=.4;
+		}
+		else
+			y = 0;
+		x = 0;
+		x = .6;
+		useDriveParams = true;
+		robotAngle = 90;
+		driveBase->DriveControlTwist->SetPID(.01, 0, 0);
+		if(GetClock() - autoStepTime > .5) {
+			autoStepComplete = true;
+		}
+		break;
+		break;
+
+
+
+	case CrabToWall:
+		SmartDashboard::PutString("AutoStep", "CrabToWall");
+		y = -.05*(autoleftUSDistanceToWall - driveBase->leftUS->GetDistance2());
+		if (y<-.4)
+			y=-.4;
+		if (y>.4)
+			y=.4;
+		x = 0;
+		robotAngle = 90;
+		driveBase->DriveControlTwist->SetPID(.01, 0, .15);
+		driveBase->DriveControlTwist->SetOutputRange(-.2, .2);
+		useDriveParams = true;
+		if(fabs(autoleftUSDistanceToWall - driveBase->leftUS->GetDistance2()) < 2) {
 			onTargetCounter++;
 			if(onTargetCounter > 5) {
 				autoStepComplete = true;
@@ -260,15 +319,20 @@ void Robot::AutonomousPeriodic() {
 
 	case DriveForward15:
 		SmartDashboard::PutString("AutoStep", "DriveForward15");
-		y = -.01*(autoleftUSDistanceToWall - driveBase->leftUS->GetDistance());
+		if(driveBase->leftUS->GetDistance1() > 65)
+			y = -.008*(autoleftUSDistanceToWall - driveBase->leftUS->GetDistance1());
+		else if (driveBase->leftUS->GetDistance2() > 65)
+			y = -.008*(autoleftUSDistanceToWall - driveBase->leftUS->GetDistance2());
+		else
+			y = 0;
 		if (y<-.1)
 			y=-.1;
 		if (y>.1)
 			y=.1;
-		x = .6;
+		x = .5;
 		useDriveParams = true;
 		robotAngle = 90;
-		driveBase->DriveControlTwist->SetPID(.01, 0, 0);
+		driveBase->DriveControlTwist->SetPID(.02, 0, 0);
 		if(GetClock() - autoStepTime > .5) {
 			autoStepComplete = true;
 		}
@@ -276,7 +340,46 @@ void Robot::AutonomousPeriodic() {
 
 	case ForwardToTote:
 		SmartDashboard::PutString("AutoStep", "ForwardToTote");
-		y =-.01*(autoleftUSDistanceToWall - driveBase->leftUS->GetDistance());
+		if(driveBase->leftUS->GetDistance1() > 65)
+			y = -.008*(autoleftUSDistanceToWall - driveBase->leftUS->GetDistance1());
+		else if (driveBase->leftUS->GetDistance2() > 65)
+			y = -.008*(autoleftUSDistanceToWall - driveBase->leftUS->GetDistance2());
+		else
+			y = 0;
+		if (y<-.1)
+			y=-.1;
+		if (y>.1)
+			y=.1;
+		x = 0.2;
+		useDriveParams = true;
+		driveBase->DriveControlTwist->SetPID(.005, 0, 0);
+		if((GetClock() - autoStepTime > .5) && (driveBase->toteWideLeft->Get() || driveBase->toteWideRight->Get())) {
+			autoStepComplete = true;
+		}
+		break;
+
+	case ForwardToThirdTote:
+		SmartDashboard::PutString("AutoStep", "ForwardToThirdTote");
+		if(driveBase->leftUS->GetDistance2() > 65) {
+			y = -.05*(autoleftUSDistanceToWall - driveBase->leftUS->GetDistance2());
+			if (y<-.4)
+				y=-.4;
+			if (y>.4)
+				y=.4;
+		}
+		else
+			y = 0;
+		x = 0.2;
+		useDriveParams = true;
+		driveBase->DriveControlTwist->SetPID(.002, 0, 0);
+		if((GetClock() - autoStepTime > .5) && (driveBase->toteWideLeft->Get() || driveBase->toteWideRight->Get())) {
+			autoStepComplete = true;
+		}
+		break;
+
+	case ForwardToToteFinal:
+		SmartDashboard::PutString("AutoStep", "ForwardToToteFinal");
+		y =-.01*(autoleftUSDistanceToWall - driveBase->leftUS->GetDistance2());
 		if (y<-.1)
 			y=-.1;
 		if (y>.1)
@@ -289,37 +392,59 @@ void Robot::AutonomousPeriodic() {
 		}
 		break;
 
-	case DriveToAutoZone:
+
+	case DriveToAutoZone1:
 		SmartDashboard::PutString("AutoStep", "DriveToAutoZone");
 		x = 0;
 		y = -.6;
-		stacker->dart->SetPosition(200);
 		useDriveParams = true;
-		if(GetClock() - autoStepTime > 2.0) {
+		if(GetClock() - autoStepTime > 1.5) {
 			autoStepComplete = true;
 		}
 		break;
+
+	case DriveToAutoZone2:
+		SmartDashboard::PutString("AutoStep", "DriveToAutoZone");
+		x = 0;
+		y = -.3;
+		useDriveParams = true;
+		if(GetClock() - autoStepTime > .75) {
+			autoStepComplete = true;
+			stacker->dart->Set(300);
+		}
+		break;
+
 
 	case DropTotes:
 		SmartDashboard::PutString("AutoStep", "DropTotes");
-		x = -.2;
+		x = -.1;
 		y = 0;
 		useDriveParams = true;
 		stackerControl->LiftOpenLoop(-.2);
-		if(stacker->liftFrontRight->GetPosition() < 55000) {
+		if(stacker->liftFrontRight->GetPosition() < 57000) {
 			autoStepComplete = true;
 			stackerControl->LiftOpenLoop(0);
+			stacker->dart->Set(dartVert);
 		}
 		break;
 
-	case BackAwayFromTotes:
-		SmartDashboard::PutString("AutoStep", "BackAwayFromTotes");
-		x = -.4;
+	case WaitForDart:
+		SmartDashboard::PutString("AutoStep", "WaitForDart");
+		x = 0;
 		y = 0;
 		useDriveParams = true;
-		stacker->dart->SetPosition(900);
-		if(GetClock() - autoStepTime > .6)
+		if(fabs(stacker->dart->GetClosedLoopError()) < 10) {
 			autoStepComplete = true;
+		}
+		break;
+
+	case DartBack:
+		SmartDashboard::PutString("AutoStep", "DartBack");
+		x = 0;
+		y = 0;
+		useDriveParams = true;
+		stacker->dart->Set(900);
+		autoStepComplete = true;
 		break;
 
 	case End:
@@ -327,6 +452,10 @@ void Robot::AutonomousPeriodic() {
 		x = 0;
 		y = 0;
 		useDriveParams = false;
+		if(autoStart > 0) {
+			SmartDashboard::PutNumber("AutonomousTime", GetClock() - autoStart);
+			autoStart = 0;
+		}
 		Robot::driveBase->Lock();
 		break;
 
@@ -392,246 +521,6 @@ void Robot::AutonomousPeriodic() {
 			autoStepComplete = true;
 		}
 		break;
-
-
-/*	case IndexUp:
-		SmartDashboard::PutString("AutoStep", "IndexUp");
-		x = 0;
-		y = 0;
-		useDriveParams = true;
-		stackerControl->IncLiftPosition();
-		autoStepComplete = true;
-		break;
-
-	case WaitForLift:
-		SmartDashboard::PutString("AutoStep", "WaitForLift");
-		x = 0;
-		y = 0;
-		useDriveParams = true;
-		if(stacker->liftFrontRight->GetPosition() > 9000) {
-			autoStepComplete = true;
-		}
-		break;
-
-	case MoveDartToVertical:
-		SmartDashboard::PutString("AutoStep", "MoveDartToVertical");
-		x = 0;
-		y = 0;
-		useDriveParams = true;
-		stacker->dart->SetControlMode(CANSpeedController::kPosition);
-		stacker->dart->Set(autoTotePickupPos);
-		autoStepComplete = true;
-		break;
-
-	case WaitForDart:
-		SmartDashboard::PutString("AutoStep", "WaitForDart");
-		x = 0;
-		y = 0;
-		useDriveParams = true;
-		if(stacker->dart->GetPosition() > 300) {
-			autoStepComplete = true;
-		}
-		break;
-
-
-	case FirstMove:
-		SmartDashboard::PutString("AutoStep", "FirstMove");
-		x = 0;
-		y = .4;
-		robotAngle = -30;
-		useDriveParams = true;
-		driveBase->DriveControlTwist->SetPID(.035, 0, .25);
-		if(GetClock() - autoStepTime > .8) {
-			autoStepComplete = true;
-		}
-		break;
-
-	case DriveForwardToFirstTote:
-		SmartDashboard::PutString("AutoStep", "DriveForwardToFirstTote");
-		x = 0;
-		y = .4;
-		robotAngle = 0;
-		useDriveParams = true;
-		driveBase->DriveControlTwist->SetPID(.035, 0, .25);
-		if(GetClock() - autoStepTime > .3) {
-			autoStepComplete = true;
-		}
-		break;
-
-	case DriveForward15:
-		SmartDashboard::PutString("AutoStep", "DriveForward15");
-		x = -.01*(autoleftUSDistanceToWall - driveBase->leftUS->GetDistance1());
-		if (x<-.1)
-			x=-.1;
-		if (x>.1)
-			x=.1;
-		y = .5;
-		robotAngle = 0;
-		useDriveParams = true;
-		driveBase->DriveControlTwist->SetPID(.001, 0, .15);
-		if(GetClock() - autoStepTime > 1.5) {
-			autoStepComplete = true;
-		}
-
-		break;
-//sup dude
-//sup
-	case TurnTo40:
-		SmartDashboard::PutString("AutoStep", "TurnTo40");
-		x = 0;
-		y = 0;
-		robotAngle = -40;
-		useDriveParams = true;
-		driveBase->DriveControlTwist->SetPID(.05, 0, .25);
-		if(driveBase->DriveControlTwist->OnTarget()) {
-			onTargetCounter++;
-			if(onTargetCounter > 5) {
-				autoStepComplete = true;
-				driveBase->imu->ZeroYaw();
-				robotAngle = 0;
-			}
-		}
-			break;
-
-	case SquareToWall:
-		SmartDashboard::PutString("AutoStep", "SquareToWall");
-		x = 0;
-		y = 0;
-		useDriveParams = false;
-		twist =.05*(driveBase->leftUS->GetDistance1() - driveBase->leftUS->GetDistance2());
-		if (twist<-.2)
-			twist=-.2;
-		if (twist>.2)
-			twist=.2;
-		driveBase->Crab(twist, y, x, false);
-		if(fabs(driveBase->leftUS->GetDistance1() - driveBase->leftUS->GetDistance2()) < 2) {
-			onTargetCounter++;
-			if(onTargetCounter > 10) {
-				autoStepComplete = true;
-				driveBase->imu->ZeroYaw();
-				robotAngle = 0;
-			}
-		}
-
-		break;
-
-
-	case CrabToFirstTote:
-		SmartDashboard::PutString("AutoStep", "CrabToFirstTote");
-		driveBase->DriveControlTwist->SetPID(.0005, 0, 0);
-		x = -.05*(autoleftUSDistanceToWall - driveBase->leftUS->GetDistance1());
-		if (x<-.2)
-			x=-.2;
-		if (x>.2)
-			x=.2;
-		y = 0;
-		useDriveParams = true;
-		if(fabs(autoleftUSDistanceToWall - driveBase->leftUS->GetDistance1()) < 3) {
-			onTargetCounter++;
-			if(onTargetCounter > 5) {
-				autoStepComplete = true;
-			}
-		}
-			break;
-
-	case DriveForwardToTote:
-		SmartDashboard::PutString("AutoStep", "DriveForwardToTote");
-		x = -.01*(autoleftUSDistanceToWall - driveBase->leftUS->GetDistance2());
-		if (x<-.1)
-			x=-.1;
-		if (x>.1)
-			x=.1;
-		y = 0.2;
-		useDriveParams = true;
-		driveBase->DriveControlTwist->SetPID(.001, 0, .15);
-		if((GetClock() - autoStepTime > .5) && (!driveBase->toteWideLeft->Get() || driveBase->toteWideRight->Get())) {
-			autoStepComplete = true;
-		}
-		break;
-
-	case CenterTote:
-		SmartDashboard::PutString("AutoStep", "CenterTote");
-		if(!driveBase->toteWideLeft->Get() || !driveBase->toteWideRight->Get()) {
-			useDriveParams = false;
-			float twist = 0;
-			if (!driveBase->toteWideLeft->Get())
-				twist = -.15;
-			if (!driveBase->toteWideRight->Get())
-				twist = .15;
-			driveBase->Crab(twist,0,0,true);
-			}
-		else {
-			x = 0;
-			y = .1;
-			useDriveParams = true;
-		}
-		if(!driveBase->toteWideLeft->Get() && !driveBase->toteWideRight->Get())
-			autoStepComplete = true;
-		break;
-
-	case DriveToBump:
-		SmartDashboard::PutString("AutoStep", "DriveToBump");
-		x = -.5;
-		y = 0;
-		useDriveParams = true;
-		if(driveBase->imu->GetRoll() > 3)
-			autoStepComplete = true;
-		break;
-
-	case DriveOffBump:
-		SmartDashboard::PutString("AutoStep", "DrivePastBump");
-		x = -.5;
-		y = 0;
-		useDriveParams = true;
-		if(driveBase->imu->GetRoll() < -3) {
-			autoStepComplete = true;
-			stacker->dart->Set(toteDropPosition);
-		}
-		break;
-
-	case DriveAwayFromBump:
-		SmartDashboard::PutString("AutoStep", "DriveAwayFromBump");
-		x = -.5;
-		y = 0;
-		useDriveParams = true;
-		if(GetClock() - autoStepTime > .5) {
-			autoStepComplete = true;
-			squeezeControl->Open();
-		}
-		break;
-
-
-	case DropTotes:
-		SmartDashboard::PutString("AutoStep", "DropTotes");
-		x = 0;
-		y = -.2;
-		useDriveParams = true;
-		stackerControl->LiftOpenLoop(-.2);
-		if(stacker->liftFrontRight->GetPosition() < 55000) {
-			autoStepComplete = true;
-			stackerControl->LiftOpenLoop(0);
-
-		}
-		break;
-
-	case BackAwayFromTotes:
-		SmartDashboard::PutString("AutoStep", "BackAwayFromTotes");
-		x = 0;
-		y = -.4;
-		useDriveParams = true;
-		if(GetClock() - autoStepTime > .6)
-			autoStepComplete = true;
-		break;
-
-
-
-	case End:
-		SmartDashboard::PutString("AutoStep", "End");
-		x = 0;
-		y = 0;
-		useDriveParams = false;
-		driveBase->Lock();
-		*/
 	}
 
 	if(useDriveParams) {
@@ -650,7 +539,11 @@ void Robot::AutonomousPeriodic() {
 }
 
 void Robot::TeleopInit() {
+	stackerControl->SetDartClosedLoop(true);
+	stacker->dart->SetControlMode(CANSpeedController::kPosition);
 	stacker->dart->Set(stacker->dart->GetPosition());
+	stackerControl->LiftOpenLoop(0);
+	stackerControl->SetAutoSpeed(false);
 }
 
 void Robot::TeleopPeriodic() {
@@ -701,39 +594,30 @@ void Robot::TeleopPeriodic() {
 
 	/**************STACKER************************/
 
-	if((oi->getGamePad()->GetRawButton(6) || oi->getGamePad()->GetRawButton(8))) {
+	if(driveBase->imu->GetPitch() < -3 && !oi->getGamePad()->GetRawButton(8)) {
+		pitchControlCounter++;
+	}
+	else
+		pitchControlCounter = 0;
+
+	if (fabs(oi->getGamePad()->GetRawAxis(3)) > .1 && stackerControl->GetDartClosedLoop()) {
+		stackerControl->SetDartClosedLoop(false);
+		stacker->dart->SetControlMode(CANSpeedController::kPercentVbus);
+		dartPitchControl = false;
+	}
+
+	if(oi->getGamePad()->GetRawButton(6)) {
 
 		if (!stackerControl->GetDartClosedLoop()) {
 			stackerControl->SetDartClosedLoop(true);
 			stacker->dart->SetControlMode(CANSpeedController::kPosition);
 			dartPitchControl = false;
 		}
-
-		if(oi->getGamePad()->GetRawButton(6))
-			stacker->dart->Set(dartVert);
-
-		else if(oi->getGamePad()->GetRawButton(8))
-			stacker->dart->Set(dartPos2);
-	}
-
-	else if (fabs(oi->getGamePad()->GetRawAxis(3)) > .1) {
-		if (stackerControl->GetDartClosedLoop()) {
-			stackerControl->SetDartClosedLoop(false);
-			stacker->dart->SetControlMode(CANSpeedController::kPercentVbus);
-			dartPitchControl = false;
-		}
-		stacker->dart->Set(oi->getGamePad()->GetRawAxis(3));
+		stacker->dart->Set(dartVert);
 	}
 
 	else if(!stackerControl->GetDartClosedLoop())
-		stacker->dart->Set(0);
-
-
-	if(driveBase->imu->GetPitch() < -3) {
-		pitchControlCounter++;
-	}
-	else
-		pitchControlCounter = 0;
+		stacker->dart->Set(oi->getGamePad()->GetRawAxis(3));
 
 	if (pitchControlCounter > 20)	{
 		if(!dartPitchControl) {
@@ -756,6 +640,8 @@ void Robot::TeleopPeriodic() {
 		stackerControl->SetLiftPosition(9);
 	}
 
+
+//IncLift
 	if(oi->getGamePad()->GetRawButton(5) || oi->getDriverRight()->GetRawButton(3)) {
 		if (!pressed5) {
 		stackerControl->IncLiftPosition();
@@ -765,6 +651,12 @@ void Robot::TeleopPeriodic() {
 	else
 		pressed5 = false;
 
+
+//LiftContainer
+	if(oi->getDriverRight()->GetRawButton(4))
+		stackerControl->SetLiftPosition(4);
+
+//DecLift
 	if (oi->getGamePad()->GetRawButton(7)) {
 		if (!pressed7) {
 			stackerControl->DecLiftPoistion();
@@ -774,6 +666,7 @@ void Robot::TeleopPeriodic() {
 	else
 		pressed7 = false;
 
+//Automated Release
 	if(oi->getGamePad()->GetRawButton(2)) {
 		if(!pressed2) {
 			stackerControl->Release();
@@ -783,6 +676,7 @@ void Robot::TeleopPeriodic() {
 	else
 		pressed2 = false;
 
+//Home Lift
 	if (oi->getGamePad()->GetPOV(0) == 180) {
 		stackerControl->Home();
 
@@ -794,6 +688,7 @@ void Robot::TeleopPeriodic() {
 
 	}
 
+//Lift Open Loop
 	if (fabs(oi->getGamePad()->GetRawAxis(1)) > .1) {
 		stackerControl->LiftOpenLoop(-oi->getScaledJoystick(oi->getGamePad()->GetRawAxis(1),3));
 		liftUsingJoystick = true;
@@ -857,7 +752,8 @@ void Robot::DriveBaseSMDB() {
 	SmartDashboard::PutBoolean("ToteNarrowLeftB", driveBase->toteNarrowLeft->Get());
 	SmartDashboard::PutBoolean("ToteNarrowRightB", driveBase->toteNarrowRight->Get());
 	SmartDashboard::PutBoolean("ToteWideRightB", driveBase->toteWideRight->Get());
-	SmartDashboard::PutNumber("UltrasonicDistanceLeft", driveBase->leftUS->GetDistance());
+	SmartDashboard::PutNumber("UltrasonicDistanceLeft1(Mid)", driveBase->leftUS->GetDistance1());
+	SmartDashboard::PutNumber("UltrasonicDistanceLeft2(Front)", driveBase->leftUS->GetDistance2());
 	SmartDashboard::PutNumber("JoystickRadians", oi->getLeftJoystickXRadians());
 
 }

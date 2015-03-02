@@ -61,7 +61,7 @@ DriveBase::DriveBase() : Subsystem("DriveBase") {
     uint8_t update_rate_hz = 50;
     imu = new IMU(serialport,update_rate_hz);
 
-    leftUS = new MaxBoticsI2CXL(I2C::kOnboard, 1, .025);
+    leftUS = new DualMaxBoticsI2CXL(I2C::kOnboard, 1, 2, .025);
 
 	CrabSpeedTwist = new CrabSpeed();
     DriveControlTwist = new PIDController(.035, 0, .1, imu, CrabSpeedTwist, 0.02);

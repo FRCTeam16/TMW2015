@@ -158,7 +158,7 @@ public:
 	SerialPort *serialport;
 	uint8_t USAdress;
 
-	MaxBoticsI2CXL *leftUS;
+	DualMaxBoticsI2CXL *leftUS;
 };
 
 #endif

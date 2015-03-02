@@ -42,7 +42,7 @@ void StackerControlTask::Run() {
 	case Homing:
 		if(Robot::stacker->home->Get() && !homed)
 			if (Robot::stacker->liftFrontRight->GetPosition() > 20000)
-				SetOutput(-.3);
+				SetOutput(-.7);
 			else
 				SetOutput(-.4);
 		else {
@@ -59,7 +59,7 @@ void StackerControlTask::Run() {
 	case ClosedLoop:
 		if(autoSpeed) {
 			speed = autoLiftPositionSpeeds[i];
-			ramp = (GetClock() - incStartTime)*.5;
+			ramp = (GetClock() - incStartTime)*1;
 			if(ramp > 1)
 				ramp = 1;
 		}
@@ -96,19 +96,25 @@ void StackerControlTask::Run() {
 	case Releasing:
 		switch (releaseState) {
 
+		case DartOut:
+			Robot::stacker->dart->SetControlMode(CANSpeedController::kPosition);
+			Robot::stacker->dart->Set(dartStartRelease);
+			dartClosedLoop = true;
+			if (fabs(Robot::stacker->dart->GetClosedLoopError()) < 2)
+				releaseState = Down;
+			break;
+
 		case Down:
 			if(releaseLiftStartPosition - Robot::stacker->liftFrontRight->GetPosition() < 21000)
 				Robot::stacker->liftFrontRight->Set(-.2);
 			else {
 				Robot::stacker->liftFrontRight->Set(0);
-				dartClosedLoop = true;
-				Robot::stacker->dart->SetControlMode(CANSpeedController::kPosition);
-				Robot::stacker->dart->Set(releaseDartStartPosition + 200);
-				releaseState = Back;
+				Robot::stacker->dart->Set(dartVert);
+				releaseState = Vert;
 			}
 			break;
 
-		case Back:
+		case Vert:
 			if (fabs(Robot::stacker->dart->GetClosedLoopError()) < 2) {
 					releaseState = ReleaseContainer;
 					Robot::squeezeControl->Open();
@@ -116,8 +122,16 @@ void StackerControlTask::Run() {
 			break;
 
 		case ReleaseContainer:
-			if (Robot::squeezeControl->GetOpened())
-				releaseState = Up;
+			if (Robot::squeezeControl->GetOpened()) {
+				releaseState = Back;
+				Robot::stacker->dart->Set(dartEndRelease);
+			}
+			break;
+
+		case Back:
+			if (fabs(Robot::stacker->dart->GetClosedLoopError()) < 2) {
+					releaseState = Up;
+			}
 			break;
 
 		case Up:
@@ -126,7 +140,6 @@ void StackerControlTask::Run() {
 			releaseState = Down;
 			break;
 		}
-
 		break;
 
 	case ContainerUp:
@@ -197,13 +210,13 @@ void StackerControlTask::Home() {
 
 void StackerControlTask::Release() {
 	liftState = Releasing;
-	releaseState = Down;
+	releaseState = DartOut;
 	releaseLiftStartPosition = Robot::stacker->liftFrontRight->GetPosition();
 	releaseDartStartPosition = Robot::stacker->dart->GetPosition();
 }
 
 int StackerControlTask::GetError() {
-	return liftPositions[i] + 1000 - Robot::stacker->liftFrontRight->GetPosition();
+	return liftPositions[i] - Robot::stacker->liftFrontRight->GetPosition();
 	//added 1000 to positions for practice bot
 }
 
