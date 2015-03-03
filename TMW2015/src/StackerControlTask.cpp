@@ -18,9 +18,9 @@ StackerControlTask::StackerControlTask() {
 	homeStartTime = GetClock();
 	smokeStartTime = GetClock();
 	releaseLiftStartPosition = 0;
-	releaseDartStartPosition = 0;
 	liftState = OpenLoop;
 	releaseState = Down;
+	releaseStage1Complete = false;
 	dartClosedLoop = true;
 	incStartTime = GetClock();
 	autoSpeed = false;
@@ -75,8 +75,6 @@ void StackerControlTask::Run() {
 			SetOutput(speed*ramp);
 		else if (error > 0)
 			SetOutput(speed*error/controlRange);
-//		else if (error > -controlRange/2)
-//			SetOutput(0);
 		else if (error > -controlRange)
 			SetOutput(.3*error/controlRange);
 		else if (error < -controlRange)
@@ -90,7 +88,22 @@ void StackerControlTask::Run() {
 		break;
 
 	case OpenLoop:
-		SetOutput(openLoopSpeed);
+		if(fabs(openLoopSpeed) > .1)
+			SetOutput(openLoopSpeed);
+		else {
+			error = holdPosition - Robot::stacker->liftFrontRight->GetPosition();
+			speed = .75;
+			if (error > controlRange)
+				SetOutput(speed);
+			else if (error > 0)
+				SetOutput(speed*error/controlRange);
+			else if (error > -controlRange)
+				SetOutput(.3*error/controlRange);
+			else if (error < -controlRange)
+				SetOutput(-.3);
+			else
+				SetOutput(0);
+		}
 		break;
 
 	case Releasing:
@@ -116,12 +129,16 @@ void StackerControlTask::Run() {
 
 		case Vert:
 			if (fabs(Robot::stacker->dart->GetClosedLoopError()) < 2) {
-					releaseState = ReleaseContainer;
-					Robot::squeezeControl->Open();
+				releaseStage1Complete = true;
 			}
 			break;
 
 		case ReleaseContainer:
+			Robot::squeezeControl->Open();
+			releaseState = WaitForOpen;
+			break;
+
+		case WaitForOpen:
 			if (Robot::squeezeControl->GetOpened()) {
 				releaseState = Back;
 				Robot::stacker->dart->Set(dartEndRelease);
@@ -130,7 +147,7 @@ void StackerControlTask::Run() {
 
 		case Back:
 			if (fabs(Robot::stacker->dart->GetClosedLoopError()) < 2) {
-					releaseState = Up;
+				releaseState = Up;
 			}
 			break;
 
@@ -138,6 +155,7 @@ void StackerControlTask::Run() {
 			i = 7;
 			liftState = ClosedLoop;
 			releaseState = Down;
+			releaseStage1Complete = false;
 			break;
 		}
 		break;
@@ -167,6 +185,7 @@ void StackerControlTask::Run() {
 void StackerControlTask::IncLiftPosition() {
 
 	liftState = ClosedLoop;
+	releaseStage1Complete = false;
 
 	if(i < 7)
 		i++;
@@ -180,22 +199,26 @@ void StackerControlTask::IncLiftPosition() {
 void StackerControlTask::DecLiftPoistion() {
 
 	liftState = ClosedLoop;
-
+	releaseStage1Complete = false;
 	if(i > 0)
 		i--;
 }
 void StackerControlTask::SetLiftPosition(int arrayPosition) {
 
 	liftState = ClosedLoop;
+	releaseStage1Complete = false;
 	i = arrayPosition;
 }
 
 void StackerControlTask::LiftOpenLoop(float Speed) {
-
 	liftState = OpenLoop;
 	openLoopSpeed = Speed;
-}
 
+	if(fabs(Speed) > .1) {
+		holdPosition = Robot::stacker->liftFrontRight->GetPosition();
+	}
+
+}
 bool StackerControlTask::GetLiftClosedLoop() {
 	return liftState == ClosedLoop;
 }
@@ -205,14 +228,18 @@ void StackerControlTask::Home() {
 	homeStartTime = GetClock();
 	Robot::squeezeControl->Open();
 	homed = false;
+	releaseStage1Complete = false;
 	i = 0;
 }
 
 void StackerControlTask::Release() {
 	liftState = Releasing;
-	releaseState = DartOut;
-	releaseLiftStartPosition = Robot::stacker->liftFrontRight->GetPosition();
-	releaseDartStartPosition = Robot::stacker->dart->GetPosition();
+	if(!releaseStage1Complete) {
+		releaseState = DartOut;
+		releaseLiftStartPosition = Robot::stacker->liftFrontRight->GetPosition();
+	}
+	else
+		releaseState = ReleaseContainer;
 }
 
 int StackerControlTask::GetError() {
