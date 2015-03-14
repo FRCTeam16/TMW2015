@@ -17,14 +17,21 @@ CenterToteTask::CenterToteTask() {
 	picked = false;
 	i=0;
 	j=0;
+	inPosCount = 0;
 }
 
 void CenterToteTask::Run() {
 
 	if(!picked && Robot::driveBase->toteWideLeft->Get() && Robot::driveBase->toteWideRight->Get() && Robot::driveBase->toteNarrowLeft->Get() && Robot::driveBase->toteNarrowRight->Get()) {
+		inPosCount++;
+	}
+	else
+		inPosCount = 0;
+
+	if(inPosCount > 1) {
 		Robot::stackerControl->IncLiftPosition();
 		picked = true;
-	}
+		}
 
 	else if(Robot::driveBase->toteWideLeft->Get() ^ Robot::driveBase->toteWideRight->Get()) {
 		if(Robot::driveBase->toteWideLeft->Get()){

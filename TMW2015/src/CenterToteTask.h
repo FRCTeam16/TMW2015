@@ -27,6 +27,7 @@ private:
 	bool picked;
 	int i;
 	int j;
+	int inPosCount;
 };
 
 #endif /* SRC_CenterToteTask_H_ */

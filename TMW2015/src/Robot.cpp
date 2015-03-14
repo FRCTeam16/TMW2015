@@ -136,15 +136,16 @@ void Robot::AutonomousInit() {
 
 		stackerControl->SetLiftPosition(0);
 		stackerControl->SetAutoSpeed(true);
-		stacker->liftFrontRight->SetPosition(-428);
+		stacker->liftFrontRight->SetPosition(-3500);
+		stacker->dart->Set(dartVert);
 		break;
 
 	case ContainerGrabber:
 		genericAutoProgram.push_back(ExtendGrabber);
 		genericAutoProgram.push_back(RetractGrabber);
 		genericAutoProgram.push_back(DriveOverBump);
-		genericAutoProgram.push_back(DriveAwayFromBumpWithCont);
-		genericAutoProgram.push_back(FinishTurn);
+//		genericAutoProgram.push_back(DriveAwayFromBumpWithCont);
+//		genericAutoProgram.push_back(FinishTurn);
 		genericAutoProgram.push_back(End);
 		break;
 
@@ -162,6 +163,10 @@ void Robot::AutonomousInit() {
 		genericAutoProgram.push_back(DriveToAutoZone1);
 		genericAutoProgram.push_back(DriveToAutoZone2);
 		genericAutoProgram.push_back(End);
+		stackerControl->SetLiftPosition(0);
+		stackerControl->SetAutoSpeed(true);
+		stacker->liftFrontRight->SetPosition(-3500);
+		stacker->dart->Set(dartVert);
 		break;
 
 	case DoNothing:
@@ -176,9 +181,7 @@ void Robot::AutonomousInit() {
 	robotAngle = 0;
 	driveBase->imu->ZeroYaw();
 	stackerControl->SetDartClosedLoop(true);
-	stacker->dart->SetControlMode(CANSpeedController::kPosition);
-	stacker->dart->Set(stacker->dart->GetPosition());}
-
+}
 void Robot::AutonomousPeriodic() {
 	SmartDashboard::PutBoolean("LiftSmokedB",!stackerControl->GetSmoked());
 	SendArduinoOutputs();
@@ -469,7 +472,7 @@ void Robot::AutonomousPeriodic() {
 
 		if (pdp->GetCurrent(9) > 50 && GetClock() - autoStepTime > .5)
 			autoCurrentStop++;
-		if(autoCurrentStop > 10)
+		if(autoCurrentStop > 3 || GetClock() - autoStepTime > 2.0)
 			autoStepComplete = true;
 		break;
 
@@ -480,7 +483,7 @@ void Robot::AutonomousPeriodic() {
 		useDriveParams = false;
 		driveBase->Lock();
 		grabber->extension->Set(-1.0);
-		if (pdp->GetCurrent(9) > 40 && GetClock() - autoStepTime > .25) {
+		if ((pdp->GetCurrent(9) > 40 && GetClock() - autoStepTime > .25) || GetClock() - autoStepTime > 2.0) {
 			autoStepComplete = true;
 			grabber->extension->Set(0);
 		}
@@ -502,13 +505,11 @@ void Robot::AutonomousPeriodic() {
 
 	case DriveAwayFromBumpWithCont:
 		SmartDashboard::PutString("AutoStep", "DriveAwayFromBumpWithCont");
-		x = 0;
-		y = 1.0;
-		robotAngle = -90;
+		x = 0.5;
+		y = 0.0;
 		useDriveParams = true;
-		if (GetClock() - autoStepTime > .5) {
+		if (GetClock() - autoStepTime > 1.0) {
 			autoStepComplete = true;
-			grabber->extension->Set(0);
 		}
 		break;
 

@@ -24,6 +24,7 @@ StackerControlTask::StackerControlTask() {
 	dartClosedLoop = true;
 	incStartTime = GetClock();
 	autoSpeed = false;
+	holdPosition = Robot::stacker->liftFrontRight->GetPosition();
 }
 
 StackerControlTask::~StackerControlTask() {
@@ -88,22 +89,7 @@ void StackerControlTask::Run() {
 		break;
 
 	case OpenLoop:
-		if(fabs(openLoopSpeed) > .1)
-			SetOutput(openLoopSpeed);
-		else {
-			error = holdPosition - Robot::stacker->liftFrontRight->GetPosition();
-			speed = .75;
-			if (error > controlRange)
-				SetOutput(speed);
-			else if (error > 0)
-				SetOutput(speed*error/controlRange);
-			else if (error > -controlRange)
-				SetOutput(.3*error/controlRange);
-			else if (error < -controlRange)
-				SetOutput(-.3);
-			else
-				SetOutput(0);
-		}
+		SetOutput(openLoopSpeed);
 		break;
 
 	case Releasing:

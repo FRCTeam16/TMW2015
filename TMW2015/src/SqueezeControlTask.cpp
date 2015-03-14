@@ -45,12 +45,12 @@ void SqueezeControlTask::Run() {
 		break;
 
 	case Closing:
-		if (Robot::stacker->squeeze->GetOutputCurrent() < 20)
+		if (Robot::stacker->squeeze->GetOutputCurrent() < 40)
 			currentStop = 0;
 		else
 			currentStop++;
 		cout << currentStop << endl;
-		if (currentStop > 10 || GetClock() - startTime > 1.5 || (currentStop == 0 && Robot::stacker->squeezePosition->GetRaw() < -50000)) { // check for stop
+		if (currentStop > 10 || GetClock() - startTime > 2.0 || (currentStop == 0 && Robot::stacker->squeezePosition->GetRaw() < -65000)) { // check for stop
 			Robot::stacker->squeeze->Set(0);
 			squeezed = true;
 			squeezerState = Hold;
