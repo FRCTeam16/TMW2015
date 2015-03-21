@@ -34,6 +34,7 @@ DigitalInput* RobotMap::driveBaseToteWideLeft = NULL;
 DigitalInput* RobotMap::driveBaseToteNarrowLeft = NULL;
 DigitalInput* RobotMap::driveBaseToteNarrowRight = NULL;
 DigitalInput* RobotMap::driveBaseToteWideRight = NULL;
+DigitalInput* RobotMap::driveBaseTotePresent = NULL;
 CANTalon* RobotMap::stackerLiftFrontRight = NULL;
 CANTalon* RobotMap::stackerLiftFrontLeft = NULL;
 CANTalon* RobotMap::stackerDart = NULL;
@@ -123,6 +124,9 @@ void RobotMap::init() {
 	driveBaseToteWideRight = new DigitalInput(4);
 	lw->AddSensor("DriveBase", "ToteWideRight", driveBaseToteWideRight);
 	
+	driveBaseTotePresent = new DigitalInput(5);
+	lw->AddSensor("DriveBase", "TotePresent", driveBaseTotePresent);
+	
 	stackerLiftFrontRight = new CANTalon(12);
 	
 	
@@ -145,21 +149,10 @@ void RobotMap::init() {
 	grabberExtension = new Talon(4);
 	lw->AddActuator("Grabber", "Extension", (Talon*) grabberExtension);
 	
-
-
 	arduinoSensorLeft = new DigitalOutput(10);
 	lw->AddActuator("Arduino", "SensorLeft", arduinoSensorLeft);
-
-	arduinoSensorMiddleLeft = new DigitalOutput(11);
-	lw->AddActuator("Arduino", "SensorMiddleLeft", arduinoSensorMiddleLeft);
 	
-	arduinoSensorMiddle = new DigitalOutput(19);
-	lw->AddActuator("Arduino", "SensorMiddle", arduinoSensorMiddle);
-
-	arduinoSensorMiddleRight = new DigitalOutput(13);
-	lw->AddActuator("Arduino", "SensorMiddleRight", arduinoSensorMiddleRight);
-
-	arduinoSensorRight = new DigitalOutput(12);
+	arduinoSensorRight = new DigitalOutput(14);
 	lw->AddActuator("Arduino", "SensorRight", arduinoSensorRight);
 	
 	arduinoRobotState1 = new DigitalOutput(15);
@@ -167,6 +160,15 @@ void RobotMap::init() {
 	
 	arduinoRobotState2 = new DigitalOutput(16);
 	lw->AddActuator("Arduino", "RobotState2", arduinoRobotState2);
+	
+	arduinoSensorMiddleLeft = new DigitalOutput(11);
+	lw->AddActuator("Arduino", "SensorMiddleLeft", arduinoSensorMiddleLeft);
+	
+	arduinoSensorMiddle = new DigitalOutput(12);
+	lw->AddActuator("Arduino", "SensorMiddle", arduinoSensorMiddle);
+	
+	arduinoSensorMiddleRight = new DigitalOutput(13);
+	lw->AddActuator("Arduino", "SensorMiddleRight", arduinoSensorMiddleRight);
 	
 
 

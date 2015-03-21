@@ -117,6 +117,7 @@ void Robot::AutonomousInit() {
 		genericAutoProgram.push_back(Turn90);
 		genericAutoProgram.push_back(DriveForward15);
 		genericAutoProgram.push_back(ForwardToTote);
+		genericAutoProgram.push_back(DropForPickup);
 		genericAutoProgram.push_back(IndexUp);
 		genericAutoProgram.push_back(WaitForLiftCoast);
 //		genericAutoProgram.push_back(DrivePastContainer);
@@ -356,7 +357,28 @@ void Robot::AutonomousPeriodic() {
 		x = 0.2;
 		useDriveParams = true;
 		driveBase->DriveControlTwist->SetPID(.005, 0, 0);
-		if((GetClock() - autoStepTime > .5) && (driveBase->toteWideLeft->Get() || driveBase->toteWideRight->Get())) {
+		if(driveBase->totePresent->Get()) {
+			autoStepComplete = true;
+			stackerControl->SetDropPos(true);
+		}
+		break;
+
+	case DropForPickup:
+		SmartDashboard::PutString("AutoStep", "DropForPickup");
+		if(driveBase->leftUS->GetDistance1() > 65)
+			y = -.008*(autoleftUSDistanceToWall - driveBase->leftUS->GetDistance1());
+		else if (driveBase->leftUS->GetDistance2() > 65)
+			y = -.008*(autoleftUSDistanceToWall - driveBase->leftUS->GetDistance2());
+		else
+			y = 0;
+		if (y<-.1)
+			y=-.1;
+		if (y>.1)
+			y=.1;
+		x = 0.2;
+		useDriveParams = true;
+		driveBase->DriveControlTwist->SetPID(.005, 0, 0);
+		if(fabs(stackerControl->GetError() < 700)) {
 			autoStepComplete = true;
 		}
 		break;
@@ -614,7 +636,20 @@ void Robot::TeleopPeriodic() {
 			stacker->dart->SetControlMode(CANSpeedController::kPosition);
 			dartPitchControl = false;
 		}
-		stacker->dart->Set(dartVert);
+		if(stackerControl->Geti() == 7)
+			stacker->dart->Set(dartVert - 10);
+		else
+			stacker->dart->Set(dartVert);
+	}
+
+	else if(oi->getGamePad()->GetRawButton(4)) {
+
+		if (!stackerControl->GetDartClosedLoop()) {
+			stackerControl->SetDartClosedLoop(true);
+			stacker->dart->SetControlMode(CANSpeedController::kPosition);
+			dartPitchControl = false;
+		}
+		stacker->dart->Set(800);
 	}
 
 	else if(!stackerControl->GetDartClosedLoop())
@@ -633,12 +668,12 @@ void Robot::TeleopPeriodic() {
 		dartPitchControl = false;
 	}
 
-	if(oi->getGamePad()->GetRawButton(4)) {
+	if(oi->getGamePad()->GetPOV() == 0) {
 		stacker->dart->SetControlMode(CANSpeedController::kPosition);
 		stackerControl->SetDartClosedLoop(true);
 		stacker->dart->Set(dartFullBack);
 		dartPitchControl = false;
-		stackerControl->SetLiftPosition(9);
+		stackerControl->SetLiftPosition(10);
 	}
 
 
@@ -655,7 +690,7 @@ void Robot::TeleopPeriodic() {
 
 //LiftContainer
 	if(oi->getDriverRight()->GetRawButton(4))
-		stackerControl->SetLiftPosition(4);
+		stackerControl->SetLiftPosition(5);
 
 //DecLift
 	if (oi->getGamePad()->GetRawButton(7)) {
@@ -670,7 +705,7 @@ void Robot::TeleopPeriodic() {
 //Automated Release
 	if(oi->getGamePad()->GetRawButton(2)) {
 		if(!pressed2) {
-			stackerControl->Release();
+			stackerControl->PickupContainer();
 			pressed2 = true;
 		}
 	}
@@ -686,11 +721,14 @@ void Robot::TeleopPeriodic() {
 			stacker->dart->SetControlMode(CANSpeedController::kPosition);
 		}
 		stacker->dart->Set(dartContPickPos);
-
 	}
 
+//Testing 6-Container Stack
+	if(oi->getDriverLeft()->GetRawButton(6))
+		stackerControl->SetDropPos(true);
+
 //Lift Open Loop
-	if (fabs(oi->getGamePad()->GetRawAxis(1)) > .1) {
+	if (fabs(oi->getGamePad()->GetRawAxis(1)) > .05) {
 		stackerControl->LiftOpenLoop(-oi->getScaledJoystick(oi->getGamePad()->GetRawAxis(1),3));
 		liftUsingJoystick = true;
 	}
@@ -699,10 +737,14 @@ void Robot::TeleopPeriodic() {
 		liftUsingJoystick = false;
 	}
 
+//	stacker->squeeze->Set(oi->getGamePad()->GetRawAxis(0));
+
 	if(oi->getGamePad()->GetPOV() == 270)
 		squeezeControl->Close(false);
 	if(oi->getGamePad()->GetPOV() == 90)
 		squeezeControl->Open();
+
+
 
 
 	/**************GRABBER************************/

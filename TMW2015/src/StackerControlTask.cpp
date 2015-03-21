@@ -25,6 +25,9 @@ StackerControlTask::StackerControlTask() {
 	incStartTime = GetClock();
 	autoSpeed = false;
 	holdPosition = Robot::stacker->liftFrontRight->GetPosition();
+	dropPos = false;
+	pickupComplete = false;
+	pickupStage1Complete = false;
 }
 
 StackerControlTask::~StackerControlTask() {
@@ -49,11 +52,8 @@ void StackerControlTask::Run() {
 		else {
 			Robot::stacker->liftFrontRight->SetPosition(0);
 			homed = true;
-			SetOutput(0);
-		}
-
-		if (homed && Robot::squeezeControl->GetOpened() && (Robot::stacker->dart->GetPosition() < 100 || !Robot::stacker->dart->GetReverseLimitOK())) {
 			liftState = ClosedLoop;
+			SetOutput(0);
 		}
 		break;
 
@@ -69,11 +69,14 @@ void StackerControlTask::Run() {
 			ramp = (GetClock() - incStartTime)*2;
 			if(ramp > 1)
 				ramp = 1;
-
 		}
 
-		if (error > controlRange)
-			SetOutput(speed*ramp);
+		if (error > controlRange) {
+			if(i>2)
+				SetOutput(ramp);
+			else
+				SetOutput(speed*ramp);
+		}
 		else if (error > 0)
 			SetOutput(speed*error/controlRange);
 		else if (error > -controlRange)
@@ -104,7 +107,7 @@ void StackerControlTask::Run() {
 			break;
 
 		case Down:
-			if(releaseLiftStartPosition - Robot::stacker->liftFrontRight->GetPosition() < 21000)
+			if(releaseLiftStartPosition - Robot::stacker->liftFrontRight->GetPosition() < 12000)
 				Robot::stacker->liftFrontRight->Set(-.2);
 			else {
 				Robot::stacker->liftFrontRight->Set(0);
@@ -165,6 +168,29 @@ void StackerControlTask::Run() {
 		else
 			SetOutput(0);
 		break;
+
+	case ContainerPickup:
+			if (error > controlRange)
+				SetOutput(1);
+			else if (error > 0)
+				SetOutput(speed*error/controlRange);
+			else if (error > -controlRange)
+				SetOutput(.3*error/controlRange);
+			else if (error < -controlRange)
+				SetOutput(-.3);
+			else
+				SetOutput(0);
+
+			if(fabs(error) < 500) {
+				if(i == 5)
+					pickupStage1Complete = true;
+				if(i == 11) {
+					pickupComplete = true;
+					pickupStage1Complete = false;
+				}
+			}
+
+		break;
 	}
 }
 
@@ -172,8 +198,8 @@ void StackerControlTask::IncLiftPosition() {
 
 	liftState = ClosedLoop;
 	releaseStage1Complete = false;
-
-	if(i < 7)
+	dropPos = false;
+	if(i < 8)
 		i++;
 	incStartTime = GetClock();
 
@@ -186,6 +212,7 @@ void StackerControlTask::DecLiftPoistion() {
 
 	liftState = ClosedLoop;
 	releaseStage1Complete = false;
+	dropPos = false;
 	if(i > 0)
 		i--;
 }
@@ -193,13 +220,14 @@ void StackerControlTask::SetLiftPosition(int arrayPosition) {
 
 	liftState = ClosedLoop;
 	releaseStage1Complete = false;
+	dropPos = false;
 	i = arrayPosition;
 }
 
 void StackerControlTask::LiftOpenLoop(float Speed) {
 	liftState = OpenLoop;
 	openLoopSpeed = Speed;
-
+	dropPos = false;
 	if(fabs(Speed) > .1) {
 		holdPosition = Robot::stacker->liftFrontRight->GetPosition();
 	}
@@ -210,16 +238,20 @@ bool StackerControlTask::GetLiftClosedLoop() {
 }
 
 void StackerControlTask::Home() {
-	liftState = Homing;
-	homeStartTime = GetClock();
-	Robot::squeezeControl->Open();
-	homed = false;
-	releaseStage1Complete = false;
-	i = 0;
+	if(i != 0 || Robot::stacker->liftFrontRight->GetPosition() > 10000) {
+		liftState = Homing;
+		homeStartTime = GetClock();
+		homed = false;
+		dropPos = false;
+		releaseStage1Complete = false;
+		i = 0;
+	}
+	Robot::squeezeControl->Home();
 }
 
 void StackerControlTask::Release() {
 	liftState = Releasing;
+	dropPos = false;
 	if(!releaseStage1Complete) {
 		releaseState = DartOut;
 		releaseLiftStartPosition = Robot::stacker->liftFrontRight->GetPosition();
@@ -228,9 +260,26 @@ void StackerControlTask::Release() {
 		releaseState = ReleaseContainer;
 }
 
+void StackerControlTask::PickupContainer() {
+	liftState = ContainerPickup;
+	dropPos = false;
+	if(!pickupStage1Complete) {
+		Robot::stacker->dart->SetControlMode(CANSpeedController::kPosition);
+		Robot::stacker->dart->Set(49);
+		dartClosedLoop = true;
+		i = 5;
+		pickupComplete = false;
+	}
+	else {
+		i = 11;
+	}
+}
+
 int StackerControlTask::GetError() {
-	return liftPositions[i] - Robot::stacker->liftFrontRight->GetPosition();
-	//added 1000 to positions for practice bot
+	int error = liftPositions[i] - Robot::stacker->liftFrontRight->GetPosition() - 1000;
+	if(dropPos)
+		error -= 3500;
+	return error;
 }
 
 bool StackerControlTask::GetHoming() {
@@ -273,4 +322,13 @@ void StackerControlTask::SetAutoSpeed(bool AutoSpeed) {
 void StackerControlTask::LiftContainer() {
 	incStartTime = GetClock();
 	liftState = ContainerUp;
+	dropPos = false;
+}
+
+void StackerControlTask::SetDropPos(bool value) {
+	dropPos = value;
+}
+
+bool StackerControlTask::GetDropPos() {
+	return dropPos;
 }

@@ -19,16 +19,19 @@ public:
 	virtual void Run();
 	void Open();
 	void Close(bool wait);
+	void Home();
 	bool GetSqueezed();
 	bool GetOpened();
 
 private:
-	typedef enum {WaitForLift, Opening, Closing, Hold} SqueezerState;
+	typedef enum {WaitForLift, Opening, Closing, Homing, Hold} SqueezerState;
 	SqueezerState squeezerState;
 	bool squeezed;
 	bool opened;
 	float startTime;
 	int currentStop;
+	float containerTouchTime;
+	bool containerTouched;
 };
 
 #endif /* SRC_SqueezeControlTask_H_ */

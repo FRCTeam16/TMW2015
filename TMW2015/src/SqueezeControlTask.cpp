@@ -14,6 +14,8 @@ SqueezeControlTask::SqueezeControlTask() {
 	squeezerState = Hold;
 	startTime = GetClock();
 	currentStop = 0;
+	containerTouchTime = 0;
+	containerTouched = false;
 }
 
 SqueezeControlTask::~SqueezeControlTask() {
@@ -30,13 +32,12 @@ void SqueezeControlTask::Run() {
 		else
 			currentStop = 0;
 
-		if (currentStop > 5 || GetClock() - startTime > 3.0) { // check for stop
+		if (Robot::stacker->squeezePosition->GetRaw() > -2000 || currentStop > 5 || GetClock() - startTime > 3.0) { // check for stop
 			Robot::stacker->squeeze->Set(0);
 			opened = true;
 			squeezerState = Hold;
-			Robot::stacker->squeezePosition->Reset();
 		}
-		else if (Robot::stacker->squeezePosition->GetRaw() > -5000){ // check for slow down
+		else if (Robot::stacker->squeezePosition->GetRaw() > -4000){ // check for slow down
 			Robot::stacker->squeeze->Set(-.5);
 		}
 		else { // just run
@@ -44,13 +45,30 @@ void SqueezeControlTask::Run() {
 		}
 		break;
 
-	case Closing:
-		if (Robot::stacker->squeeze->GetOutputCurrent() < 40)
-			currentStop = 0;
-		else
+	case Homing:
+		if (Robot::stacker->squeeze->GetOutputCurrent() > .75)
 			currentStop++;
-		cout << currentStop << endl;
-		if (currentStop > 10 || GetClock() - startTime > 2.0 || (currentStop == 0 && Robot::stacker->squeezePosition->GetRaw() < -65000)) { // check for stop
+		else
+			currentStop = 0;
+
+		if (currentStop > 3 || GetClock() - startTime > 3.0) { // check for stop
+			Robot::stacker->squeeze->Set(0);
+			opened = true;
+			squeezerState = Hold;
+			Robot::stacker->squeezePosition->Reset();
+		}
+		else { //run
+			Robot::stacker->squeeze->Set(-.3);
+		}
+		break;
+
+	case Closing:
+		if (Robot::stacker->squeeze->GetOutputCurrent() > 2.5 && !containerTouched) {
+			containerTouchTime = GetClock();
+			containerTouched = true;
+		}
+
+		if ((containerTouched > 0 && GetClock() - containerTouchTime > 1.0) || Robot::stacker->squeezePosition->GetRaw() < -30000) {
 			Robot::stacker->squeeze->Set(0);
 			squeezed = true;
 			squeezerState = Hold;
@@ -68,6 +86,7 @@ void SqueezeControlTask::Run() {
 			break;
 
 	case Hold:
+		Robot::stacker->squeeze->Set(0);
 		break;
 	}
 }
@@ -84,6 +103,8 @@ void SqueezeControlTask::Close(bool wait) {
 	squeezed = false;
 	opened = false;
 	currentStop = 0;
+	containerTouchTime = 0;
+	containerTouched = false;
 	if (wait)
 		squeezerState = WaitForLift;
 	else {
@@ -91,6 +112,13 @@ void SqueezeControlTask::Close(bool wait) {
 		startTime = GetClock();
 	}
 
+}
+
+void SqueezeControlTask::Home() {
+	squeezed = false;
+	startTime = GetClock();
+	currentStop = 0;
+	squeezerState = Homing;
 }
 
 bool SqueezeControlTask::GetSqueezed() {

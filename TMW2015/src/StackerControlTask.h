@@ -32,21 +32,27 @@ public:
 	bool GetDartClosedLoop();
 	void SetAutoSpeed(bool AutoSpeed);
 	void LiftContainer();
+	void SetDropPos(bool value);
+	bool GetDropPos();
+	void PickupContainer();
 
 private:
-//	int liftPositions[10] = {0, 19500, 20858, 41750, 62800, 83944, 104706, 112125, 67400, 116806};  //Practice saved at arkansas regional
-	int liftPositions[10] = {0, 19500, 20858, 41000, 62000, 83000, 104000, 112125, 67400, 116806};  //Practice
-	float liftPositionSpeeds[10] =     {.1, .5, .5, .6, .7, .7, .8, .85, .8, .85};
-	float autoLiftPositionSpeeds[10] = {.1, .4, .4, .5, .5, .7, .75, .75, .7, .75};
+//	int liftPositions[10] = {0, 19500, 20858, 41000, 62000, 83000, 104000, 112125, 67400, 116806};  //competition
+	int liftPositions[12] = {0, 19500, 24000, 43000, 61000, 78200, 96000, 113500, 113500, 67400, 116806, 52378}; // 6 Tote Stack Testing
+	float liftPositionSpeeds[12] =     {.1, .5, .5, .6, .7, .7, .8, .85, .85, .8, .85, .5};
+//	float liftPositionSpeeds[11] =     {.1, .5, .5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, .8, .85};
+	float autoLiftPositionSpeeds[12] = {.1, .4, .4, .5, .5, .7, .75, .75, .75, .7, .75, .5};
 	bool autoSpeed;
-	typedef enum {Homing, ClosedLoop, OpenLoop, Releasing, ContainerUp} LiftState;
+	typedef enum {Homing, ClosedLoop, OpenLoop, Releasing, ContainerUp, ContainerPickup} LiftState;
 	LiftState liftState;
 	typedef enum {DartOut, Down, Vert, ReleaseContainer, WaitForOpen, Back, Up} ReleaseState;
-	int dartStartRelease = 400;
-	int dartVert = 500;
+	typedef enum {ConveyorToFirst, ConveyorToSecond}PickupState;
+	int dartStartRelease = 500;
+	int dartVert = 588;
 	int dartEndRelease = 800;
 	ReleaseState releaseState;
 	bool releaseStage1Complete;
+	bool dropPos;
 	int holdPosition;
 	int i;
 	float openLoopSpeed;
@@ -54,6 +60,8 @@ private:
 	int controlRange;
 	int releaseLiftStartPosition;
 	bool homed;
+	bool pickupStage1Complete;
+	bool pickupComplete;
 	double prevCycleTime;
 	double homeStartTime;
 	double smokeStartTime;

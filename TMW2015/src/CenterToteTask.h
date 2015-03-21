@@ -28,6 +28,7 @@ private:
 	int i;
 	int j;
 	int inPosCount;
+	bool dropped;
 };
 
 #endif /* SRC_CenterToteTask_H_ */

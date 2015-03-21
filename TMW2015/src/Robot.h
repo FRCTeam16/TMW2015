@@ -63,11 +63,11 @@ private:
 	double RROffset;
 	bool prevTrigger;
 	Preferences* Prefs;
-	int dartVert = 503;
+	int dartVert = 588;
 	int dartBumpPos = 649;
 	int dartPos2 = 333;
 	int dartFullBack = 920;
-	int dartContPickPos = 90;
+	int dartContPickPos = 275;
 	bool dartPitchControl = false;
 	double pickupStartTime = GetClock();
 	int pitchControlCounter = 0;
@@ -77,7 +77,7 @@ private:
 	bool liftUsingJoystick = false;
 	int autoCurrentStop = 0;
 	typedef enum {ThreeToteStacker, ContainerGrabber, ToteAndContainer, DoNothing, DriveForward}AutoProgram;
-	typedef enum {IndexUp, WaitForLift, WaitForLiftCoast, WaitForLiftFinal, CrabAwayFromWall, DrivePastContainer, DriveForward15, PickThirdTote, DriveToAutoZone1, DriveToAutoZone2, DropTotes, DartBack, ForwardToTote,ForwardToToteFinal, WaitForDart, ForwardToThirdTote, Turn90, CrabToWall, ExtendGrabber, RetractGrabber, DriveOverBump, DriveAwayFromBumpWithCont, FinishTurn, End}AutoStep;
+	typedef enum {IndexUp, DropForPickup, WaitForLift, WaitForLiftCoast, WaitForLiftFinal, CrabAwayFromWall, DrivePastContainer, DriveForward15, PickThirdTote, DriveToAutoZone1, DriveToAutoZone2, DropTotes, DartBack, ForwardToTote,ForwardToToteFinal, WaitForDart, ForwardToThirdTote, Turn90, CrabToWall, ExtendGrabber, RetractGrabber, DriveOverBump, DriveAwayFromBumpWithCont, FinishTurn, End}AutoStep;
 	AutoStep autoStep;
 	AutoProgram autoProgram;
 	bool autoStepComplete = false;
