@@ -20,14 +20,16 @@ public:
 	void Open();
 	void Close(bool wait);
 	void Home();
+	void SetOpenLoop(float output);
 	bool GetSqueezed();
 	bool GetOpened();
 
 private:
-	typedef enum {WaitForLift, Opening, Closing, Homing, Hold} SqueezerState;
+	typedef enum {WaitForLift, Opening, Closing, Homing, Hold, OpenLoop} SqueezerState;
 	SqueezerState squeezerState;
 	bool squeezed;
 	bool opened;
+	float openLoopOutput;
 	float startTime;
 	int currentStop;
 	float containerTouchTime;

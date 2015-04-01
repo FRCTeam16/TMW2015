@@ -369,7 +369,17 @@ Children:
           validators: *id011
           value: '5'
       Base: Digital Input
-      Name: Digital Input 1
+      Name: TotePresent
+    - Children: []
+      Properties:
+        Input Channel (Digital): !!robotbuilder.data.properties.ChoicesProperty
+          choices: *id010
+          default: '0'
+          name: Input Channel (Digital)
+          validators: *id011
+          value: '8'
+      Base: Digital Input
+      Name: AutoToteSensor
     Properties:
       Default Command: !!robotbuilder.data.properties.TypeSelectionProperty {default: None,
         name: Default Command, type: Command, validators: null, value: None}
@@ -483,7 +493,23 @@ Children:
           validators: *id009
           value: '4'
       Base: Speed Controller
-      Name: Extension
+      Name: GrabberLeft
+    - Children: []
+      Properties:
+        Type: !!robotbuilder.data.properties.ChoicesProperty
+          choices: *id007
+          default: Talon
+          name: Type
+          validators: null
+          value: Talon
+        Output Channel (PWM): !!robotbuilder.data.properties.ChoicesProperty
+          choices: *id008
+          default: '0'
+          name: Output Channel (PWM)
+          validators: *id009
+          value: '5'
+      Base: Speed Controller
+      Name: GrabberRight
     Properties:
       Default Command: !!robotbuilder.data.properties.TypeSelectionProperty {default: None,
         name: Default Command, type: Command, validators: null, value: None}

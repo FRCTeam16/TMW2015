@@ -66,7 +66,7 @@ private:
 	int dartVert = 588;
 	int dartBumpPos = 649;
 	int dartPos2 = 333;
-	int dartFullBack = 920;
+	int dartFullBack = 820;
 	int dartContPickPos = 275;
 	bool dartPitchControl = false;
 	double pickupStartTime = GetClock();
@@ -74,10 +74,15 @@ private:
 	bool pressed5 = false;
 	bool pressed7 = false;
 	bool pressed2 = false;
+	bool squeezeOpenLoop = false;
 	bool liftUsingJoystick = false;
 	int autoCurrentStop = 0;
-	typedef enum {ThreeToteStacker, ContainerGrabber, ToteAndContainer, DoNothing, DriveForward}AutoProgram;
-	typedef enum {IndexUp, DropForPickup, WaitForLift, WaitForLiftCoast, WaitForLiftFinal, CrabAwayFromWall, DrivePastContainer, DriveForward15, PickThirdTote, DriveToAutoZone1, DriveToAutoZone2, DropTotes, DartBack, ForwardToTote,ForwardToToteFinal, WaitForDart, ForwardToThirdTote, Turn90, CrabToWall, ExtendGrabber, RetractGrabber, DriveOverBump, DriveAwayFromBumpWithCont, FinishTurn, End}AutoStep;
+	int dropCounter = 0;
+	bool rampRising = false;
+	int waitDropCounter = 0;
+	int stackeriStart = 0;
+	typedef enum {ThreeToteStacker, ThreeToteCrabStacker, ContainerGrabber, ToteAndContainer, DoNothing, DriveForward}AutoProgram;
+	typedef enum {DriveAwayFromTote, WaitForUS, DriveBackOntoBump, DriveToContainer, DrivePastContainer, StartTurningWheels, DriveUpToTote, DriveAcrossToTote, CenterOnTote, IndexUp, WaitForLift, WaitForLiftFinal, DriveToAutoZone1, DriveToAutoZone2, DropTotes, GrabberDown, DriveForwardWithContainers1, DriveForwardWithContainers2 , ReleaseContainers, GrabberUp, End}AutoStep;
 	AutoStep autoStep;
 	AutoProgram autoProgram;
 	bool autoStepComplete = false;
@@ -86,9 +91,10 @@ private:
 	vector<AutoStep> genericAutoProgram;
 	SendableChooser* autoChooser;
 	float autoStepTime = GetClock();
-	float robotAngle = 0;
+	int robotAngle = 0;
 	float autoleftUSDistanceToWall = 78;
 	float autoFarUSDistanceToWall = 180;
+	float autoUSDistanceToFieldEdge = 180;
 	int onTargetCounter = 0;
 	void SystemSMDB();
 	void DriveBaseSMDB();

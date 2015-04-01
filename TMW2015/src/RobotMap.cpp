@@ -35,13 +35,15 @@ DigitalInput* RobotMap::driveBaseToteNarrowLeft = NULL;
 DigitalInput* RobotMap::driveBaseToteNarrowRight = NULL;
 DigitalInput* RobotMap::driveBaseToteWideRight = NULL;
 DigitalInput* RobotMap::driveBaseTotePresent = NULL;
+DigitalInput* RobotMap::driveBaseAutoToteSensor = NULL;
 CANTalon* RobotMap::stackerLiftFrontRight = NULL;
 CANTalon* RobotMap::stackerLiftFrontLeft = NULL;
 CANTalon* RobotMap::stackerDart = NULL;
 DigitalInput* RobotMap::stackerHome = NULL;
 CANTalon* RobotMap::stackerSqueeze = NULL;
 Encoder* RobotMap::stackerSqueezePosition = NULL;
-SpeedController* RobotMap::grabberExtension = NULL;
+SpeedController* RobotMap::grabberGrabberLeft = NULL;
+SpeedController* RobotMap::grabberGrabberRight = NULL;
 DigitalOutput* RobotMap::arduinoSensorLeft = NULL;
 DigitalOutput* RobotMap::arduinoSensorRight = NULL;
 DigitalOutput* RobotMap::arduinoRobotState1 = NULL;
@@ -127,6 +129,9 @@ void RobotMap::init() {
 	driveBaseTotePresent = new DigitalInput(5);
 	lw->AddSensor("DriveBase", "TotePresent", driveBaseTotePresent);
 	
+	driveBaseAutoToteSensor = new DigitalInput(8);
+	lw->AddSensor("DriveBase", "AutoToteSensor", driveBaseAutoToteSensor);
+	
 	stackerLiftFrontRight = new CANTalon(12);
 	
 	
@@ -146,8 +151,11 @@ void RobotMap::init() {
 	lw->AddSensor("Stacker", "SqueezePosition", stackerSqueezePosition);
 	stackerSqueezePosition->SetDistancePerPulse(1.46484375E-4);
         stackerSqueezePosition->SetPIDSourceParameter(Encoder::kDistance);
-	grabberExtension = new Talon(4);
-	lw->AddActuator("Grabber", "Extension", (Talon*) grabberExtension);
+	grabberGrabberLeft = new Talon(4);
+	lw->AddActuator("Grabber", "GrabberLeft", (Talon*) grabberGrabberLeft);
+	
+	grabberGrabberRight = new Talon(5);
+	lw->AddActuator("Grabber", "GrabberRight", (Talon*) grabberGrabberRight);
 	
 	arduinoSensorLeft = new DigitalOutput(10);
 	lw->AddActuator("Arduino", "SensorLeft", arduinoSensorLeft);

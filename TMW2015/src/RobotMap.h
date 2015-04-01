@@ -43,13 +43,15 @@ public:
 	static DigitalInput* driveBaseToteNarrowRight;
 	static DigitalInput* driveBaseToteWideRight;
 	static DigitalInput* driveBaseTotePresent;
+	static DigitalInput* driveBaseAutoToteSensor;
 	static CANTalon* stackerLiftFrontRight;
 	static CANTalon* stackerLiftFrontLeft;
 	static CANTalon* stackerDart;
 	static DigitalInput* stackerHome;
 	static CANTalon* stackerSqueeze;
 	static Encoder* stackerSqueezePosition;
-	static SpeedController* grabberExtension;
+	static SpeedController* grabberGrabberLeft;
+	static SpeedController* grabberGrabberRight;
 	static DigitalOutput* arduinoSensorLeft;
 	static DigitalOutput* arduinoSensorRight;
 	static DigitalOutput* arduinoRobotState1;

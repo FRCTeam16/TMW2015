@@ -86,7 +86,7 @@ void CenterToteTask::Run() {
 			Robot::driveBase->Crab(0,.15,0,false);
 	}
 	else
-		Robot::driveBase->Crab(0,0,0,false);
+		Robot::driveBase->Crab(0,.2,0,false);
 
 }
 

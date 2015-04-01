@@ -37,7 +37,8 @@ StackerControlTask::~StackerControlTask() {
 void StackerControlTask::Run() {
 
 	int error = GetError();
-	float speed = 0;
+	float upspeed = 0;
+	float downspeed = 0;
 
 	float ramp = 0;
 
@@ -59,34 +60,38 @@ void StackerControlTask::Run() {
 
 	case ClosedLoop:
 		if(autoSpeed) {
-			speed = autoLiftPositionSpeeds[i];
+			upspeed = autoLiftPositionSpeeds[i];
+			downspeed = .5;
 			ramp = (GetClock() - incStartTime)*1;
 			if(ramp > 1)
 				ramp = 1;
 		}
 		else {
-			speed = liftPositionSpeeds[i];
-			ramp = (GetClock() - incStartTime)*2;
+			upspeed = liftPositionSpeeds[i];
+			downspeed = .75;
+			ramp = (GetClock() - incStartTime)*6;
 			if(ramp > 1)
 				ramp = 1;
 		}
 
 		if (error > controlRange) {
-			if(i>2)
+			if(i>3 && !autoSpeed)
 				SetOutput(ramp);
 			else
-				SetOutput(speed*ramp);
+				SetOutput(upspeed*ramp);
 		}
-		else if (error > 0)
-			SetOutput(speed*error/controlRange);
+		else if (upspeed*error > 0)
+			SetOutput(upspeed*error/controlRange);
 		else if (error > -controlRange)
-			SetOutput(.3*error/controlRange);
-		else if (error < -controlRange)
-			SetOutput(-.3);
+			SetOutput(downspeed*error/controlRange);
+		else if (error > -30000)
+			SetOutput(-downspeed);
+		else if (error < -30000)
+			SetOutput(-1.0);
 		else
 			SetOutput(0);
 
-		if(i == 1 && Robot::squeezeControl->GetSqueezed())
+		if(!autoSpeed && i == 1)// && Robot::squeezeControl->GetSqueezed())
 			i++;
 
 		break;
@@ -152,17 +157,17 @@ void StackerControlTask::Run() {
 	case ContainerUp:
 		if(GetClock() - incStartTime < 3) {
 			error = 116806 - Robot::stacker->liftFrontRight->GetPosition();
-			speed = .75;
+			upspeed = .75;
 		}
 		else
 //			error = top - - Robot::stacker->liftFrontRight->GetPosition();
 
 		if (error > controlRange)
-			SetOutput(speed);
+			SetOutput(upspeed);
 		else if (error > 0)
-			SetOutput(speed*error/controlRange);
+			SetOutput(upspeed*error/controlRange);
 		else if (error > -controlRange)
-			SetOutput(.3*error/controlRange);
+			SetOutput(.6*error/controlRange);
 		else if (error < -controlRange)
 			SetOutput(-.3);
 		else
@@ -173,7 +178,7 @@ void StackerControlTask::Run() {
 			if (error > controlRange)
 				SetOutput(1);
 			else if (error > 0)
-				SetOutput(speed*error/controlRange);
+				SetOutput(upspeed*error/controlRange);
 			else if (error > -controlRange)
 				SetOutput(.3*error/controlRange);
 			else if (error < -controlRange)
@@ -203,9 +208,10 @@ void StackerControlTask::IncLiftPosition() {
 		i++;
 	incStartTime = GetClock();
 
-	if (i == 1) {
+/*	if (i == 1 ) {
 		Robot::squeezeControl->Close(true);
 	}
+*/
 }
 
 void StackerControlTask::DecLiftPoistion() {
@@ -276,9 +282,11 @@ void StackerControlTask::PickupContainer() {
 }
 
 int StackerControlTask::GetError() {
-	int error = liftPositions[i] - Robot::stacker->liftFrontRight->GetPosition() - 1000;
+	int error = liftPositions[i] - Robot::stacker->liftFrontRight->GetPosition();
+	if(autoSpeed)
+		error = autoliftPositions[i] - Robot::stacker->liftFrontRight->GetPosition();
 	if(dropPos)
-		error -= 3500;
+		error -= 5000;
 	return error;
 }
 

@@ -12,20 +12,24 @@ class DualMaxBoticsI2CXL {
   void Start();
   void Pause();
   void Terminate();
-  int GetDistance1();
-  int GetDistance2();
+int GetDistance(int address);
+  int GetFilteredDistance(int lowfilter, int highfilter);
+  int GetFilteredError(int lowfilter, int highfilter, int setpoint);
  private:
-  uint8_t address1_;
-  uint8_t address2_;
+//  uint8_t address1_;
+ // uint8_t address2_;
+  uint8_t address_[2];
+  unsigned char distance_[2][2];
   bool enabled_;
   bool running_;
   bool isDead_;
-  unsigned char distance1_[2] = {0,0};
-  unsigned char distance2_[2] = {0,0};
+//  unsigned char distance1_[2] = {0,0};
+ // unsigned char distance2_[2] = {0,0};
   float frequency_;
   Task* task_;
-  I2C* sensor1_;
-  I2C* sensor2_;
+//  I2C* sensor1_;
+//  I2C* sensor2_;
+  I2C* sensor_[2];
 };
 
 #endif  // DualMaxBoticsI2CXL_H_
