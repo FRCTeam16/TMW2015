@@ -50,8 +50,9 @@ public:
 	static DigitalInput* stackerHome;
 	static CANTalon* stackerSqueeze;
 	static Encoder* stackerSqueezePosition;
-	static SpeedController* grabberGrabberLeft;
-	static SpeedController* grabberGrabberRight;
+	static SpeedController* stackerSuckerLeft;
+	static SpeedController* stackerSuckerRight;
+	static SpeedController* grabberGrabber;
 	static DigitalOutput* arduinoSensorLeft;
 	static DigitalOutput* arduinoSensorRight;
 	static DigitalOutput* arduinoRobotState1;

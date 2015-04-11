@@ -472,6 +472,38 @@ Children:
           value: '7'
       Base: Quadrature Encoder
       Name: SqueezePosition
+    - Children: []
+      Properties:
+        Type: !!robotbuilder.data.properties.ChoicesProperty
+          choices: *id007
+          default: Talon
+          name: Type
+          validators: null
+          value: Talon
+        Output Channel (PWM): !!robotbuilder.data.properties.ChoicesProperty
+          choices: *id008
+          default: '0'
+          name: Output Channel (PWM)
+          validators: *id009
+          value: '5'
+      Base: Speed Controller
+      Name: SuckerLeft
+    - Children: []
+      Properties:
+        Type: !!robotbuilder.data.properties.ChoicesProperty
+          choices: *id007
+          default: Talon
+          name: Type
+          validators: null
+          value: Talon
+        Output Channel (PWM): !!robotbuilder.data.properties.ChoicesProperty
+          choices: *id008
+          default: '0'
+          name: Output Channel (PWM)
+          validators: *id009
+          value: '6'
+      Base: Speed Controller
+      Name: SuckerRight
     Properties:
       Default Command: !!robotbuilder.data.properties.TypeSelectionProperty {default: None,
         name: Default Command, type: Command, validators: null, value: None}
@@ -493,23 +525,7 @@ Children:
           validators: *id009
           value: '4'
       Base: Speed Controller
-      Name: GrabberLeft
-    - Children: []
-      Properties:
-        Type: !!robotbuilder.data.properties.ChoicesProperty
-          choices: *id007
-          default: Talon
-          name: Type
-          validators: null
-          value: Talon
-        Output Channel (PWM): !!robotbuilder.data.properties.ChoicesProperty
-          choices: *id008
-          default: '0'
-          name: Output Channel (PWM)
-          validators: *id009
-          value: '5'
-      Base: Speed Controller
-      Name: GrabberRight
+      Name: Grabber
     Properties:
       Default Command: !!robotbuilder.data.properties.TypeSelectionProperty {default: None,
         name: Default Command, type: Command, validators: null, value: None}

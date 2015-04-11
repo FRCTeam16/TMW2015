@@ -42,8 +42,9 @@ CANTalon* RobotMap::stackerDart = NULL;
 DigitalInput* RobotMap::stackerHome = NULL;
 CANTalon* RobotMap::stackerSqueeze = NULL;
 Encoder* RobotMap::stackerSqueezePosition = NULL;
-SpeedController* RobotMap::grabberGrabberLeft = NULL;
-SpeedController* RobotMap::grabberGrabberRight = NULL;
+SpeedController* RobotMap::stackerSuckerLeft = NULL;
+SpeedController* RobotMap::stackerSuckerRight = NULL;
+SpeedController* RobotMap::grabberGrabber = NULL;
 DigitalOutput* RobotMap::arduinoSensorLeft = NULL;
 DigitalOutput* RobotMap::arduinoSensorRight = NULL;
 DigitalOutput* RobotMap::arduinoRobotState1 = NULL;
@@ -151,11 +152,14 @@ void RobotMap::init() {
 	lw->AddSensor("Stacker", "SqueezePosition", stackerSqueezePosition);
 	stackerSqueezePosition->SetDistancePerPulse(1.46484375E-4);
         stackerSqueezePosition->SetPIDSourceParameter(Encoder::kDistance);
-	grabberGrabberLeft = new Talon(4);
-	lw->AddActuator("Grabber", "GrabberLeft", (Talon*) grabberGrabberLeft);
+	stackerSuckerLeft = new Talon(5);
+	lw->AddActuator("Stacker", "SuckerLeft", (Talon*) stackerSuckerLeft);
 	
-	grabberGrabberRight = new Talon(5);
-	lw->AddActuator("Grabber", "GrabberRight", (Talon*) grabberGrabberRight);
+	stackerSuckerRight = new Talon(6);
+	lw->AddActuator("Stacker", "SuckerRight", (Talon*) stackerSuckerRight);
+	
+	grabberGrabber = new Talon(4);
+	lw->AddActuator("Grabber", "Grabber", (Talon*) grabberGrabber);
 	
 	arduinoSensorLeft = new DigitalOutput(10);
 	lw->AddActuator("Arduino", "SensorLeft", arduinoSensorLeft);

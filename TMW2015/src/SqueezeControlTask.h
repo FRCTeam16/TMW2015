@@ -25,7 +25,7 @@ public:
 	bool GetOpened();
 
 private:
-	typedef enum {WaitForLift, Opening, Closing, Homing, Hold, OpenLoop} SqueezerState;
+	typedef enum {WaitForLift, Opening, Closing, Homing, Hold, OpenLoop, Off} SqueezerState;
 	SqueezerState squeezerState;
 	bool squeezed;
 	bool opened;

@@ -11,7 +11,7 @@ using namespace std;
 SqueezeControlTask::SqueezeControlTask() {
 	squeezed = false;
 	opened = false;
-	squeezerState = Hold;
+	squeezerState = Off;
 	startTime = GetClock();
 	currentStop = 0;
 	containerTouchTime = 0;
@@ -36,7 +36,7 @@ void SqueezeControlTask::Run() {
 		if (Robot::stacker->squeezePosition->GetRaw() > -2000 || currentStop > 5 || GetClock() - startTime > 3.0) { // check for stop
 			Robot::stacker->squeeze->Set(0);
 			opened = true;
-			squeezerState = Hold;
+			squeezerState = Off;
 		}
 		else if (Robot::stacker->squeezePosition->GetRaw() > -4000){ // check for slow down
 			Robot::stacker->squeeze->Set(-.5);
@@ -55,7 +55,7 @@ void SqueezeControlTask::Run() {
 		if (currentStop > 3 || GetClock() - startTime > 3.0) { // check for stop
 			Robot::stacker->squeeze->Set(0);
 			opened = true;
-			squeezerState = Hold;
+			squeezerState = Off;
 			Robot::stacker->squeezePosition->Reset();
 		}
 		else { //run
@@ -69,12 +69,15 @@ void SqueezeControlTask::Run() {
 			containerTouched = true;
 		}
 
-		if ((containerTouched > 0 && GetClock() - containerTouchTime > .5) || Robot::stacker->squeezePosition->GetRaw() < -26000) {
-			Robot::stacker->squeeze->Set(0);
+		if (containerTouched > 0 && GetClock() - containerTouchTime > .5) {
 			squeezed = true;
 			squeezerState = Hold;
 		}
-		else {
+		else if (Robot::stacker->squeezePosition->GetRaw() < -26000) {
+			squeezed = true;
+			squeezerState = Off;
+		}
+		else{
 			Robot::stacker->squeeze->Set(1.0); // just run
 		}
 		break;
@@ -86,8 +89,12 @@ void SqueezeControlTask::Run() {
 		}
 			break;
 
-	case Hold:
+	case Off:
 		Robot::stacker->squeeze->Set(0);
+		break;
+
+	case Hold:
+		Robot::stacker->squeeze->Set(.1);
 		break;
 
 	case OpenLoop:

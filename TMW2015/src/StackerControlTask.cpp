@@ -61,7 +61,7 @@ void StackerControlTask::Run() {
 	case ClosedLoop:
 		if(autoSpeed) {
 			upspeed = autoLiftPositionSpeeds[i];
-			downspeed = .5;
+			downspeed = 755;
 			ramp = (GetClock() - incStartTime)*1;
 			if(ramp > 1)
 				ramp = 1;
