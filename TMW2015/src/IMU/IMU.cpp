@@ -235,6 +235,9 @@ void IMU::ZeroYaw()
 	yaw_offset = GetAverageFromYawHistory();
 }
 
+void IMU::SetYaw(float angle) {
+	yaw_offset = GetAverageFromYawHistory() - angle;
+}
 
 /**
  * Return the yaw angle in degrees.

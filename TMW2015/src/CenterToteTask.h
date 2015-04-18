@@ -29,6 +29,8 @@ private:
 	int j;
 	int inPosCount;
 	bool dropped;
+	int crookedCounter;
+	int outCounter;
 };
 
 #endif /* SRC_CenterToteTask_H_ */

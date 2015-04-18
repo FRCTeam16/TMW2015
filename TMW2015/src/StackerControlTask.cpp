@@ -61,7 +61,7 @@ void StackerControlTask::Run() {
 	case ClosedLoop:
 		if(autoSpeed) {
 			upspeed = autoLiftPositionSpeeds[i];
-			downspeed = 755;
+			downspeed = .75;
 			ramp = (GetClock() - incStartTime)*1;
 			if(ramp > 1)
 				ramp = 1;
@@ -90,9 +90,6 @@ void StackerControlTask::Run() {
 			SetOutput(-1.0);
 		else
 			SetOutput(0);
-
-		if(!autoSpeed && i == 1)// && Robot::squeezeControl->GetSqueezed())
-			i++;
 
 		break;
 
@@ -244,14 +241,14 @@ bool StackerControlTask::GetLiftClosedLoop() {
 }
 
 void StackerControlTask::Home() {
-	if(i != 0 || Robot::stacker->liftFrontRight->GetPosition() > 10000) {
-		liftState = Homing;
-		homeStartTime = GetClock();
-		homed = false;
-		dropPos = false;
-		releaseStage1Complete = false;
-		i = 0;
-	}
+//	if(i != 0 || Robot::stacker->liftFrontRight->GetPosition() > 10000) {
+	liftState = Homing;
+	homeStartTime = GetClock();
+	homed = false;
+	dropPos = false;
+	releaseStage1Complete = false;
+	i = 0;
+//	}
 	Robot::squeezeControl->Home();
 }
 
@@ -286,7 +283,7 @@ int StackerControlTask::GetError() {
 	if(autoSpeed)
 		error = autoliftPositions[i] - Robot::stacker->liftFrontRight->GetPosition();
 	if(dropPos)
-		error -= 5000;
+		error -= 3000;
 	return error;
 }
 
@@ -339,4 +336,12 @@ void StackerControlTask::SetDropPos(bool value) {
 
 bool StackerControlTask::GetDropPos() {
 	return dropPos;
+}
+
+void StackerControlTask::Reset() {
+	liftState = ClosedLoop;
+	releaseStage1Complete = false;
+	dropPos = false;
+	i = 1;
+	Robot::squeezeControl->Home();
 }

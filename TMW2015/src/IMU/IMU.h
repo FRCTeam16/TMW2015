@@ -61,6 +61,7 @@ public:
 							float yaw_offset_degrees, 
 							uint16_t q1_offset, uint16_t q2_offset, uint16_t q3_offset, uint16_t q4_offset,
 							uint16_t flags );
+	void SetYaw(float angle);
 	double GetYawOffset() { return yaw_offset; }
 	double GetByteCount();
 	double GetUpdateCount();
