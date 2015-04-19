@@ -21,6 +21,7 @@ CenterToteTask::CenterToteTask() {
 	inPosCount = 0;
 	outCounter = 0;
 	crookedCounter = 0;
+	resetCounter = 0;
 }
 
 void CenterToteTask::Run() {
@@ -30,7 +31,6 @@ void CenterToteTask::Run() {
 		crookedCounter = 0;
 
 
-	if(!dropped) {
 		if(crookedCounter > 200) {
 //			outCounter = 5;
 		}
@@ -51,34 +51,29 @@ void CenterToteTask::Run() {
 			else
 				Robot::stacker->suckerRight->Set(-.2);
 
-			//if both proxes are made, drop the conveyor
-			if(!Robot::driveBase->toteNarrowLeft->Get() && !Robot::driveBase->toteNarrowRight->Get()) { //Move conveyor to drop position if not there
-				Robot::stackerControl->SetDropPos(true);
-				dropped = true;
+			//if both proxes are made, pickup
+			if(!Robot::driveBase->toteNarrowLeft->Get() && !Robot::driveBase->toteNarrowRight->Get()) {
+				inPosCount++;
+			}
+			else {
+				inPosCount = 0;
 			}
 		}
 
-	}
-	else {
-		Robot::stacker->suckerLeft->Set(-1.0);
-		Robot::stacker->suckerRight->Set(-1.0);
 
-		//if conveyer is in position and tote present sensor is made, index up
-		if (fabs(Robot::stackerControl->GetError()) < 500 && Robot::driveBase->toteWideLeft->Get() && Robot::driveBase->toteWideRight->Get())
-			inPosCount++;
-		else
-			inPosCount = 0;
-	}
-
-
-	if(!picked && inPosCount > 1) {
+	if(!picked && inPosCount > 100) {
 		Robot::stackerControl->IncLiftPosition();
 		picked = true;
 		}
 
 
 	//Reset if picked and dropped and all sensors aren't made
-	if(dropped && picked && !Robot::driveBase->toteWideLeft->Get() && !Robot::driveBase->toteWideRight->Get() && Robot::driveBase->toteNarrowLeft->Get() && Robot::driveBase->toteNarrowRight->Get())
+	if(picked && Robot::driveBase->toteNarrowLeft->Get() && Robot::driveBase->toteNarrowRight->Get())
+		resetCounter++;
+	else
+		resetCounter = 0;
+
+	if(resetCounter > 100)
 		Reset();
 
 /*	if(!dropped) { //Move conveyor to drop position if not there

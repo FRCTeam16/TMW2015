@@ -31,6 +31,7 @@ private:
 	bool dropped;
 	int crookedCounter;
 	int outCounter;
+	int resetCounter;
 };
 
 #endif /* SRC_CenterToteTask_H_ */

@@ -66,7 +66,7 @@ private:
 	int dartVert = 580;
 	int dartBumpPos = 649;
 	int dartPos2 = 333;
-	int dartFullBack = 850;
+	int dartFullBack = 811;
 	int dartLeanBackPickup = 789;
 	int dartContPickPos = 275;
 	bool dartPitchControl = false;
@@ -83,7 +83,7 @@ private:
 	int waitDropCounter = 0;
 	int homeCounter = 0;
 	int stackeriStart = 0;
-	typedef enum {ThreeToteStacker, ThreeToteSuckerStacker, ThreeToteCrabStacker, ContainerGrabber, ToteAndContainer, DoNothing, DriveForward}AutoProgram;
+	typedef enum {ThreeToteStacker, ThreeToteSuckerStacker, ThreeToteCrabStacker, ContainerGrabberSSR, ContainerGrabberSFR, ContainerGrabberSSN, ContainerGrabberSFN, ContainerGrabberFSR, ContainerGrabberFFR, ContainerGrabberFSN, ContainerGrabberFFN, ToteAndContainer, DoNothing, DriveForward}AutoProgram;
 	typedef enum {StartSqueezeAndSuck, DriveToFirstTote1, DriveToFirstTote2, TurnToSecondTote, DriveToSecondTote1, DriveToSecondTote2, DriveAwayFromWall, DriveToSecondContainer, DrivePastSecondContainer, DriveToThirdTote1, DriveToThirdTote2, SetDropPos, DriveAwayFromTote, WaitForUS, DriveBackOntoBump, DriveToContainer, DrivePastContainer, StartTurningWheels, DriveUpToTote, DriveAcrossToTote, CenterOnTote, IndexUp, WaitForLift, WaitForLiftFinal, DriveToAutoZone1, DriveToAutoZone2, DropTotes, GrabberDown, DriveForwardWithContainers1, DriveForwardWithContainers2 , ReleaseContainers, GrabberUp, End}AutoStep;
 	AutoStep autoStep;
 	AutoProgram autoProgram;
@@ -97,6 +97,7 @@ private:
 	float autoleftUSDistanceToWall = 78;
 	float autoFarUSDistanceToWall = 180;
 	float autoUSDistanceToFieldEdge = 180;
+	float grabberSpeed = -.75;
 	int autoStartAngle = -60;
 	int onTargetCounter = 0;
 	void SystemSMDB();

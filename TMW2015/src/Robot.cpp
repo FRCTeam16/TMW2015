@@ -67,10 +67,16 @@ void Robot::RobotInit() {
 
 	autoChooser = new SendableChooser();
 	autoChooser->AddDefault("01. ThreeToteStack", (void*)ThreeToteSuckerStacker);
-	autoChooser->AddObject("02. ContainerGrabber", (void*)ContainerGrabber);
-	autoChooser->AddObject("03. ToteAndContainer", (void*)ToteAndContainer);
-	autoChooser->AddObject("04. DriveForward", (void*)DriveForward);
-	autoChooser->AddObject("05. DoNothing", (void*)DoNothing);
+	autoChooser->AddObject("02. ContainerGrabber-Slow, Drive Short, Release", (void*)ContainerGrabberSSR);
+	autoChooser->AddObject("03. ContainerGrabber-Slow, Drive Far, Release", (void*)ContainerGrabberSFR);
+	autoChooser->AddObject("04. ContainerGrabber-Slow, Drive Short, No Release", (void*)ContainerGrabberSSN);
+	autoChooser->AddObject("05. ContainerGrabber-Slow, Drive Far, No Release", (void*)ContainerGrabberSFN);
+	autoChooser->AddObject("06. ContainerGrabber-Fast, Drive Short, Release", (void*)ContainerGrabberFSR);
+	autoChooser->AddObject("07. ContainerGrabber-Fast, Drive Far, Release", (void*)ContainerGrabberFFR);
+	autoChooser->AddObject("08. ContainerGrabber-Fast, Drive Short, No Release", (void*)ContainerGrabberFSN);
+	autoChooser->AddObject("09. ContainerGrabber-Fast, Drive Far, No Release", (void*)ContainerGrabberFFN);
+	autoChooser->AddObject("10. DriveForward", (void*)DriveForward);
+	autoChooser->AddObject("11. Do Nothing", (void*)DoNothing);
 	SmartDashboard::PutData("Autonomous Chooser", autoChooser);
 
 
@@ -108,15 +114,19 @@ void Robot::DisabledPeriodic() {
 	stacker->dart->Set(stacker->dart->GetPosition());
 	stacker->squeeze->Set(0);
 
+//	SmartDashboard::PutNumber("GrabberSpeed", (int)fastChooser->GetSelected());
+
 }
 
 void Robot::AutonomousInit() {
-    autoProgram = static_cast<AutoProgram>((int)(autoChooser->GetSelected()));
+//	if(static_cast<int>((int)(fastChooser->GetSelected())))
+//		fast
+	autoProgram = static_cast<AutoProgram>((int)(autoChooser->GetSelected()));
     genericAutoProgram.clear();
 	switch(autoProgram) {
 
 	case ThreeToteStacker:
-/*//		genericAutoProgram.push_back(IndexUp); //REMOVED ON 3/24 BECAUSE SQUEEZER NOT WORKING => GETSQUEEZED IN STACKERCONTROL IS COMMENTED OUT
+/*		genericAutoProgram.push_back(IndexUp); //REMOVED ON 3/24 BECAUSE SQUEEZER NOT WORKING => GETSQUEEZED IN STACKERCONTROL IS COMMENTED OUT
 		genericAutoProgram.push_back(IndexUp);
 		genericAutoProgram.push_back(IndexUp);
 		genericAutoProgram.push_back(WaitForLift);
@@ -177,7 +187,6 @@ void Robot::AutonomousInit() {
 		stacker->liftFrontRight->SetPosition(34281);
 		stacker->dart->Set(dartVert);
 		stackerControl->SetLiftPosition(4);
-		stackerControl->SetDropPos(true);
 		driveBase->imu->SetYaw(autoStartAngle);
 		robotAngle = -60;
 		break;
@@ -219,16 +228,108 @@ void Robot::AutonomousInit() {
 		driveBase->imu->ZeroYaw();
 		break;
 
-	case ContainerGrabber:
+	case ContainerGrabberSFR:
 		genericAutoProgram.push_back(GrabberDown);
 		genericAutoProgram.push_back(DriveForwardWithContainers1);
-		genericAutoProgram.push_back(ReleaseContainers);
 		genericAutoProgram.push_back(DriveForwardWithContainers2);
+		genericAutoProgram.push_back(ReleaseContainers);
 		genericAutoProgram.push_back(GrabberUp);
 		genericAutoProgram.push_back(GrabberUp);
 		genericAutoProgram.push_back(GrabberUp);
 		genericAutoProgram.push_back(End);
 
+		grabberSpeed = -.75;
+		stacker->dart->Set(dartFullBack);
+		robotAngle = 0;
+		driveBase->imu->ZeroYaw();
+		break;
+
+	case ContainerGrabberSSR:
+		genericAutoProgram.push_back(GrabberDown);
+		genericAutoProgram.push_back(DriveForwardWithContainers1);
+		genericAutoProgram.push_back(ReleaseContainers);
+		genericAutoProgram.push_back(GrabberUp);
+		genericAutoProgram.push_back(GrabberUp);
+		genericAutoProgram.push_back(GrabberUp);
+		genericAutoProgram.push_back(End);
+
+		grabberSpeed = -.75;
+		stacker->dart->Set(dartFullBack);
+		robotAngle = 0;
+		driveBase->imu->ZeroYaw();
+		break;
+
+	case ContainerGrabberSFN:
+		genericAutoProgram.push_back(GrabberDown);
+		genericAutoProgram.push_back(DriveForwardWithContainers1);
+		genericAutoProgram.push_back(DriveForwardWithContainers2);
+		genericAutoProgram.push_back(End);
+
+		stacker->dart->Set(dartFullBack);
+		robotAngle = 0;
+		driveBase->imu->ZeroYaw();
+		break;
+
+	case ContainerGrabberSSN:
+		genericAutoProgram.push_back(GrabberDown);
+		genericAutoProgram.push_back(DriveForwardWithContainers1);
+		genericAutoProgram.push_back(End);
+
+		grabberSpeed = -.75;
+		stacker->dart->Set(dartFullBack);
+		robotAngle = 0;
+		driveBase->imu->ZeroYaw();
+		break;
+
+	case ContainerGrabberFFR:
+		genericAutoProgram.push_back(GrabberDown);
+		genericAutoProgram.push_back(DriveForwardWithContainers1);
+		genericAutoProgram.push_back(DriveForwardWithContainers2);
+		genericAutoProgram.push_back(ReleaseContainers);
+		genericAutoProgram.push_back(GrabberUp);
+		genericAutoProgram.push_back(GrabberUp);
+		genericAutoProgram.push_back(GrabberUp);
+		genericAutoProgram.push_back(End);
+
+		grabberSpeed = -1.0;
+		stacker->dart->Set(dartFullBack);
+		robotAngle = 0;
+		driveBase->imu->ZeroYaw();
+		break;
+
+	case ContainerGrabberFSR:
+		genericAutoProgram.push_back(GrabberDown);
+		genericAutoProgram.push_back(DriveForwardWithContainers1);
+		genericAutoProgram.push_back(ReleaseContainers);
+		genericAutoProgram.push_back(GrabberUp);
+		genericAutoProgram.push_back(GrabberUp);
+		genericAutoProgram.push_back(GrabberUp);
+		genericAutoProgram.push_back(End);
+
+		grabberSpeed = -1.0;
+		stacker->dart->Set(dartFullBack);
+		robotAngle = 0;
+		driveBase->imu->ZeroYaw();
+		break;
+
+	case ContainerGrabberFFN:
+		genericAutoProgram.push_back(GrabberDown);
+		genericAutoProgram.push_back(DriveForwardWithContainers1);
+		genericAutoProgram.push_back(DriveForwardWithContainers2);
+		genericAutoProgram.push_back(End);
+
+		grabberSpeed = -1.0;
+		stacker->dart->Set(dartFullBack);
+		robotAngle = 0;
+		driveBase->imu->ZeroYaw();
+		break;
+
+	case ContainerGrabberFSN:
+		genericAutoProgram.push_back(GrabberDown);
+		genericAutoProgram.push_back(DriveForwardWithContainers1);
+		genericAutoProgram.push_back(End);
+
+		grabberSpeed = -1.0;
 		stacker->dart->Set(dartFullBack);
 		robotAngle = 0;
 		driveBase->imu->ZeroYaw();
@@ -280,7 +381,6 @@ void Robot::AutonomousPeriodic() {
 	if(oi->getDriverRight()->GetRawButton(9))
 		SystemSMDB();
 
-	SmartDashboard::PutBoolean("LiftSmokedB",!stackerControl->GetSmoked());
 	SendArduinoOutputs();
 
 	float x = 0;
@@ -320,17 +420,15 @@ void Robot::AutonomousPeriodic() {
 		driveBase->Crab(-.05,.2,0,false);
 		if(stackerControl->Geti() > 4) {
 			autoStepComplete = true;
-			centerTote->Reset();
 		}
 		break;
 
 	case TurnToSecondTote:
 		SmartDashboard::PutString("AutoStep", "TurnToSecondTote");
-		stackerControl->SetDropPos(false);
-		centerTote->Reset();
 		useDriveParams = true;
 		x=0;
 		y=0;
+		stacker->dart->Set(dartLeanBackPickup);
 		if(driveBase->imu->GetYaw() < 0 && driveBase->imu->GetYaw() > -110)
 			robotAngle = -170;
 		else
@@ -351,7 +449,7 @@ void Robot::AutonomousPeriodic() {
 		SmartDashboard::PutString("AutoStep", "DriveToSecondTote1");
 		driveBase->DriveControlTwist->SetPID(.01, 0, 0);
 		if(driveBase->leftUS->GetFilteredDistance(30, 150)) {
-			y = -.012*(driveBase->leftUS->GetFilteredError(30, 150, autoleftUSDistanceToWall));
+			y = -.02*(driveBase->leftUS->GetFilteredError(30, 150, autoleftUSDistanceToWall));
 			if (y<-.2)
 				y=-.2;
 			if (y>.2)
@@ -378,7 +476,7 @@ void Robot::AutonomousPeriodic() {
 	case DriveToSecondTote2:
 		SmartDashboard::PutString("AutoStep", "DriveToSecondTote2");
 		if(driveBase->leftUS->GetFilteredDistance(30, 150)) {
-			y = -.012*(driveBase->leftUS->GetFilteredError(30, 150, autoleftUSDistanceToWall));
+			y = -.02*(driveBase->leftUS->GetFilteredError(30, 150, autoleftUSDistanceToWall));
 			if (y<-.2)
 				y=-.2;
 			if (y>.2)
@@ -393,7 +491,6 @@ void Robot::AutonomousPeriodic() {
 		useDriveParams = true;
 		if(stackerControl->Geti() > 5 && GetClock() - autoStepTime > .4) {
 			autoStepComplete = true;
-			centerTote->Reset();
 		}
 		break;
 
@@ -421,8 +518,6 @@ void Robot::AutonomousPeriodic() {
 		x = .4;
 		robotAngle = 135;
 		useDriveParams = true;
-		stackerControl->SetDropPos(false);
-		centerTote->Reset();
 		if(GetClock() - autoStepTime > 1.5) {
 			autoStepComplete = true;
 		}
@@ -433,7 +528,7 @@ void Robot::AutonomousPeriodic() {
 		SmartDashboard::PutString("AutoStep", "DrivePastSecondContainer");
 		SmartDashboard::PutString("AutoStep", "DrivePastContainer");
 		if(driveBase->leftUS->GetFilteredDistance(130, 200)) {
-			y = -.005*(driveBase->leftUS->GetFilteredError(130, 200, 150));
+			y = -.02*(driveBase->leftUS->GetFilteredError(130, 200, 150));
 			if (y<-.2)
 				y=-.2;
 			if (y>.2)
@@ -452,7 +547,7 @@ void Robot::AutonomousPeriodic() {
 		SmartDashboard::PutString("AutoStep", "DriveToThirdTote1");
 		robotAngle = 90;
 		if(driveBase->leftUS->GetFilteredDistance(30, 150)) {
-			y = -.012*(driveBase->leftUS->GetFilteredError(30, 150, autoleftUSDistanceToWall));
+			y = -.02*(driveBase->leftUS->GetFilteredError(30, 150, autoleftUSDistanceToWall));
 			if (y<-.2)
 				y=-.2;
 			if (y>.2)
@@ -475,7 +570,7 @@ void Robot::AutonomousPeriodic() {
 	case DriveToThirdTote2:
 		SmartDashboard::PutString("AutoStep", "DriveToThirdtote2");
 		if(driveBase->leftUS->GetFilteredDistance(30, 150)) {
-			y = -.005*(driveBase->leftUS->GetFilteredError(30, 150, autoleftUSDistanceToWall));
+			y = -.02*(driveBase->leftUS->GetFilteredError(30, 150, autoleftUSDistanceToWall));
 			if (y<-.2)
 				y=-.2;
 			if (y>.2)
@@ -490,7 +585,6 @@ void Robot::AutonomousPeriodic() {
 		useDriveParams = true;
 		if(stackerControl->Geti() > 6) {
 			autoStepComplete = true;
-			centerTote->Reset();
 		}
 		break;
 
@@ -719,8 +813,8 @@ void Robot::AutonomousPeriodic() {
 		SmartDashboard::PutString("AutoStep", "GrabberDown");
 		driveBase->Lock();
 		useDriveParams = false;
-		grabber->grabber->Set(-1.0);
-		if(GetClock() - autoStepTime > 0.6) {
+		grabber->grabber->Set(grabberSpeed);
+		if(GetClock() - autoStepTime > 0.3) {
 			grabber->grabber->Set(0);
 			autoStepComplete = true;
 		}
@@ -729,9 +823,9 @@ void Robot::AutonomousPeriodic() {
 	case DriveForwardWithContainers1:
 		SmartDashboard::PutString("AutoStep", "DriveForwardWithContainers");
 		x = 0;
-		y = .5;
+		y = 1.0;
 		useDriveParams = true;
-		if(GetClock() - autoStepTime > 1.0) {
+		if(GetClock() - autoStepTime > 1.2) {
 			autoStepComplete = true;
 		}
 		break;
@@ -739,9 +833,9 @@ void Robot::AutonomousPeriodic() {
 	case DriveForwardWithContainers2:
 		SmartDashboard::PutString("AutoStep", "DriveForwardWithContainers");
 		x = 0;
-		y = .5;
+		y = .2;
 		useDriveParams = true;
-		if(GetClock() - autoStepTime > 1.6) {
+		if(GetClock() - autoStepTime > 1.5) {
 			autoStepComplete = true;
 		}
 		break;
@@ -759,7 +853,7 @@ void Robot::AutonomousPeriodic() {
 
 	case GrabberUp:
 		if(GetClock() - autoStepTime < 1.0) {
-			grabber->grabber->Set(1.0);
+			grabber->grabber->Set(.2);
 		}
 		else if (GetClock() - autoStepTime < 2.0) {
 			grabber->grabber->Set(0);
@@ -893,7 +987,7 @@ void Robot::TeleopPeriodic() {
 	else if(!stackerControl->GetDartClosedLoop())
 		stacker->dart->Set(oi->getGamePad()->GetRawAxis(3)*3/4);
 
-	if (pitchControlCounter > 20)	{
+/*	if (pitchControlCounter > 20)	{
 		if(!dartPitchControl) {
 			stacker->dart->SetControlMode(CANSpeedController::kPosition);
 			stackerControl->SetDartClosedLoop(true);
@@ -905,7 +999,7 @@ void Robot::TeleopPeriodic() {
 		stacker->dart->Set(dartVert);
 		dartPitchControl = false;
 	}
-
+*/
 	if(oi->getGamePad()->GetPOV() == 0) {
 		stacker->dart->SetControlMode(CANSpeedController::kPosition);
 		stackerControl->SetDartClosedLoop(true);
@@ -1013,6 +1107,13 @@ else
 		squeezeOpenLoop = false;
 	}
 
+	if(oi->getDriverLeft()->GetRawButton(8))
+		centerTote->Start();
+	else {
+		centerTote->Reset();
+		centerTote->Pause();
+	}
+
 
 	/************Sucker*********************/
 	//automated intake-index up
@@ -1047,9 +1148,9 @@ else
 
 	/**************GRABBER************************/
 	if(oi->getGamePad()->GetRawButton(11))
-		grabber->grabber->Set(-1.0);
+		grabber->grabber->Set(-0.5);
 	else if(oi->getGamePad()->GetRawButton(12))
-		grabber->grabber->Set(1.0);
+		grabber->grabber->Set(0.5);
 	else
 		grabber->grabber->Set(0);
 

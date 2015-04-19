@@ -46,7 +46,7 @@ private:
 	float liftPositionSpeeds[12] =     {.1,   .5,    .6,    .7,    .7,    .7,    .8,    .85,   .85,    .8,     .85,    .5}; // SAVED BEFORE CHANGING ON 4/17/2015
 //	int liftPositions[12] =            {0, 34281, 24000, 41500, 59500, 77000, 94000, 111500, 111500, 59000, 114806, 50378}; //Practice bot settings
 	int liftPositions[12] =            {0, 34281, 18600, 36600, 54300, 71800, 89300, 106750, 109000, 59000, 114806, 50378}; //for the raised lift
-	float autoliftPositions[12] =      {0, 34281, 24000, 42500, 59500, 77000, 94000, 97000, 97000, 113500, 114806, 50378};
+	float autoliftPositions[12] =      {0, 34281, 18600, 36600, 54300, 71800, 89300, 106750, 109000, 59000, 114806, 50378}; //for the raised lift old positions: {0, 34281, 24000, 42500, 59500, 77000, 94000, 97000, 97000, 113500, 114806, 50378};
 	float autoLiftPositionSpeeds[12] = {.1,    .7,    .7,    .5,   .7,    .7,     .7,    1.0,   1.0,   1.0,   1.0,   1.0};
 	bool autoSpeed;
 	typedef enum {Homing, ClosedLoop, OpenLoop, Releasing, ContainerUp, ContainerPickup} LiftState;
