@@ -88,3 +88,7 @@ int DualMaxBoticsI2CXL::GetFilteredError(int lowfilter, int highfilter, int setp
 	return setpoint - distance;
 
 }
+
+double DualMaxBoticsI2CXL::PIDGet() {
+	return (double)GetFilteredDistance(30, 150);
+}

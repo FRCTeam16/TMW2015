@@ -3,8 +3,9 @@
 #define INITREADING 0x51
 
 #include "WPILib.h"
+#include "PIDSource.h"
 
-class DualMaxBoticsI2CXL {
+class DualMaxBoticsI2CXL: public SensorBase, public PIDSource {
  public:
   DualMaxBoticsI2CXL(I2C::Port port, uint8_t address1, uint8_t address2, float frequency);
   virtual ~DualMaxBoticsI2CXL();
@@ -12,9 +13,10 @@ class DualMaxBoticsI2CXL {
   void Start();
   void Pause();
   void Terminate();
-int GetDistance(int address);
+  int GetDistance(int address);
   int GetFilteredDistance(int lowfilter, int highfilter);
   int GetFilteredError(int lowfilter, int highfilter, int setpoint);
+  double PIDGet();
  private:
 //  uint8_t address1_;
  // uint8_t address2_;

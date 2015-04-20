@@ -155,7 +155,9 @@ public:
 	void SetRLTurns(int val);
 	void SetRRTurns(int val);
 	CrabSpeed *CrabSpeedTwist;
+	CrabSpeed *CrabSpeedUS;
 	PIDController *DriveControlTwist;
+	PIDController *DriveControlUS;
 	IMU *imu;
 	SerialPort *serialport;
 	uint8_t USAdress;

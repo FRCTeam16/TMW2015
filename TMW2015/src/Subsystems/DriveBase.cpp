@@ -73,6 +73,13 @@ DriveBase::DriveBase() : Subsystem("DriveBase") {
 	DriveControlTwist->SetPID(.030, 0, .25);
 	DriveControlTwist->SetOutputRange(-.2, .2);
 	DriveControlTwist->SetInputRange(-180, 180);
+
+	CrabSpeedUS = new CrabSpeed();
+	DriveControlUS = new PIDController(-.008, 0, 0, leftUS, CrabSpeedUS, 0.02);
+	DriveControlUS->SetContinuous(false);
+	DriveControlUS->SetAbsoluteTolerance(4.0);
+	DriveControlUS->Enable();
+	DriveControlUS->SetOutputRange(-.2, .2);
 }
     
 void DriveBase::InitDefaultCommand() {

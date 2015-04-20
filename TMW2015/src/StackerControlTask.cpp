@@ -62,7 +62,7 @@ void StackerControlTask::Run() {
 		if(autoSpeed) {
 			upspeed = autoLiftPositionSpeeds[i];
 			downspeed = .75;
-			ramp = (GetClock() - incStartTime)*1;
+			ramp = (GetClock() - incStartTime)*4;
 			if(ramp > 1)
 				ramp = 1;
 		}

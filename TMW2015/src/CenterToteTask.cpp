@@ -52,7 +52,7 @@ void CenterToteTask::Run() {
 				Robot::stacker->suckerRight->Set(-.2);
 
 			//if both proxes are made, pickup
-			if(!Robot::driveBase->toteNarrowLeft->Get() && !Robot::driveBase->toteNarrowRight->Get()) {
+			if(!picked && !Robot::driveBase->toteNarrowLeft->Get() && !Robot::driveBase->toteNarrowRight->Get()) {
 				inPosCount++;
 			}
 			else {
@@ -61,7 +61,7 @@ void CenterToteTask::Run() {
 		}
 
 
-	if(!picked && inPosCount > 100) {
+	if(!picked && inPosCount > 10) {
 		Robot::stackerControl->IncLiftPosition();
 		picked = true;
 		}
