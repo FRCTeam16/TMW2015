@@ -34,6 +34,8 @@ private:
 	int currentStop;
 	float containerTouchTime;
 	bool containerTouched;
+	int GetPosition();
+	bool homed;
 };
 
 #endif /* SRC_SqueezeControlTask_H_ */

@@ -68,7 +68,10 @@ void StackerControlTask::Run() {
 		}
 		else {
 			upspeed = liftPositionSpeeds[i];
-			downspeed = .75;
+			if(i>1)
+				downspeed = .4;
+			else
+				downspeed = .8;
 			ramp = (GetClock() - incStartTime)*6;
 			if(ramp > 1)
 				ramp = 1;
@@ -343,5 +346,5 @@ void StackerControlTask::Reset() {
 	releaseStage1Complete = false;
 	dropPos = false;
 	i = 1;
-	Robot::squeezeControl->Home();
+	Robot::squeezeControl->Open();
 }

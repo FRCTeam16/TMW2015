@@ -554,7 +554,7 @@ void Robot::AutonomousPeriodic() {
 		driveBase->Crab(0,-1,0,false);
 		stacker->suckerLeft->Set(1.0);
 		stacker->suckerRight->Set(1.0);
-		if(GetClock() - autoStepTime > .25) {
+		if(GetClock() - autoStepTime > .5) {
 			autoStepComplete = true;
 		}
 		break;
