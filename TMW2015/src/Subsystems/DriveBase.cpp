@@ -75,7 +75,7 @@ DriveBase::DriveBase() : Subsystem("DriveBase") {
 	DriveControlTwist->SetInputRange(-180, 180);
 
 	CrabSpeedUS = new CrabSpeed();
-	DriveControlUS = new PIDController(-.008, 0, 0, leftUS, CrabSpeedUS, 0.02);
+	DriveControlUS = new PIDController(-.02, 0, 0, leftUS, CrabSpeedUS, 0.02);
 	DriveControlUS->SetContinuous(false);
 	DriveControlUS->SetAbsoluteTolerance(4.0);
 	DriveControlUS->Enable();

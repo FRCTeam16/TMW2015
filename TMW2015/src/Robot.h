@@ -91,10 +91,11 @@ private:
 	int autoStepi = 0;
 	double autoStart;
 	vector<AutoStep> genericAutoProgram;
+	int autoGrabberLiftPos = 71274;
 	SendableChooser* autoChooser;
 	float autoStepTime = GetClock();
 	int robotAngle = 0;
-	float autoleftUSDistanceToWall = 78;
+	float autoleftUSDistanceToWall = 75;
 	float autoFarUSDistanceToWall = 180;
 	float autoUSDistanceToFieldEdge = 180;
 	float grabberSpeed = -.75;

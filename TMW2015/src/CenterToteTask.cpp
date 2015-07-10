@@ -61,7 +61,7 @@ void CenterToteTask::Run() {
 		}
 
 
-	if(!picked && inPosCount > 10) {
+	if(!picked && inPosCount > 100) {
 		Robot::stackerControl->IncLiftPosition();
 		picked = true;
 		}
