@@ -17,11 +17,9 @@ DualMaxBoticsI2CXL::DualMaxBoticsI2CXL(I2C::Port port, uint8_t address1, uint8_t
   sensor_[0] = new I2C(port, address_[0]);
   sensor_[1] = new I2C(port, address_[1]);
   task_ = new Task("DualMaxBoticsI2CXL", (FUNCPTR)DualMaxBoticsI2CXL::Run, Task::kDefaultPriority);
-  task_->Start((uint32_t)this);
 }
 
 DualMaxBoticsI2CXL::~DualMaxBoticsI2CXL(){
-  task_->Stop();
   delete task_;
 }
 

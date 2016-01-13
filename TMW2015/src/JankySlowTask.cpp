@@ -19,13 +19,10 @@ JankySlowTask::JankySlowTask(const char* taskName, uint32_t priority) {
   isDead_ = false;
 
   task_ = new Task("JankySlowTask", (FUNCPTR)JankySlowTask::JankyPrivateStarterTask, priority);
-  task_->Start((uint32_t)this);
   //cout << "JankySlowTask Constructor Complete" << endl;
 }
 
 JankySlowTask::~JankySlowTask(){
-  task_->Stop();
-
   delete task_;   // Now kill the WPI class for the task.
 }
 

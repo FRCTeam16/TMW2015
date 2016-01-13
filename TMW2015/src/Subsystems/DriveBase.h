@@ -13,7 +13,7 @@
 #define DRIVEBASE_H
 #include "Commands/Subsystem.h"
 #include "WPILib.h"
-#include "../IMU/IMU.h"
+#include "../IMU/IMUAdvanced.h"
 #include "../CrabSpeed.h"
 #include "../MaxBoticsI2CXL.h"
 #include "../DualMaxBoticsI2CXL.h"

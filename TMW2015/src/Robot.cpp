@@ -996,8 +996,8 @@ void Robot::SendArduinoOutputs() {
 	Robot::arduino->sensorMiddleLeft->Set(!Robot::driveBase->toteNarrowLeft->Get());
 	Robot::arduino->sensorMiddleRight->Set(!Robot::driveBase->toteNarrowRight->Get());
 	Robot::arduino->sensorMiddle->Set(!Robot::driveBase->toteWideRight->Get());
-	Robot::arduino->robotState1->Set(DriverStation::GetInstance()->GetAlliance() == DriverStation::kBlue);
-	Robot::arduino->robotState2->Set(DriverStation::GetInstance()->GetAlliance() == DriverStation::kRed);
+	Robot::arduino->robotState1->Set(DriverStation::GetInstance().GetAlliance() == DriverStation::kBlue);
+	Robot::arduino->robotState2->Set(DriverStation::GetInstance().GetAlliance() == DriverStation::kRed);
 }
 
 bool Robot::ReadyForPickup() {

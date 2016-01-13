@@ -61,7 +61,7 @@ DriveBase::DriveBase() : Subsystem("DriveBase") {
 	driveFront = true;
 	serialport = new SerialPort(57600,SerialPort::kMXP);
     uint8_t update_rate_hz = 50;
-    imu = new IMU(serialport,update_rate_hz);
+    imu = new IMUAdvanced(serialport,update_rate_hz);
 
     leftUS = new DualMaxBoticsI2CXL(I2C::kOnboard, 1, 2, .025);
 

@@ -11,11 +11,9 @@ MaxBoticsI2CXL::MaxBoticsI2CXL(I2C::Port port, uint8_t address, float frequency)
   frequency_ = frequency;
   sensor_ = new I2C(port, address);
   task_ = new Task("MaxBoticsI2CXL", (FUNCPTR)MaxBoticsI2CXL::Run, Task::kDefaultPriority);
-  task_->Start((uint32_t)this);
 }
 
 MaxBoticsI2CXL::~MaxBoticsI2CXL(){
-  task_->Stop();
   delete task_;
 }
 
